@@ -13,12 +13,13 @@ export function updateZoom(zoomLevel) {
   }
 }
 
-export function updatePointZoom(latLon, zoomLevel) {
+export function updatePointZoom(latLonZoom) {
+  console.log(latLonZoom)
   return {
     type: 'updatePointZoom',
-    lat: latLon.lat,
-    lng: latLon.lon,
-    zoom: zoomLevel
+    lat: latLonZoom.lat,
+    lng: latLonZoom.lon,
+    zoom: latLonZoom.zoom
   }
 }
 

@@ -12,14 +12,12 @@ function tileInfo(state = initialState, action = {}) {
 
   switch(action.type) {
     case 'updateLatLon':
-      console.log(state);
       return {
         ...state,
         lat: action.lat,
         lon: action.lon
       };
     case 'updateZoom':
-      console.log(state);
       return {
         ...state,
         zoom: action.zoom

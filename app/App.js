@@ -25,10 +25,8 @@ class SearchBoxWrapper extends Component {
     return (
       <div className = 'row'>
         <div className = 'col-md-12'>
-          <div className = 'searchBoxContainer'>
             <SearchBox
               config = {searchConfig} />
-          </div>
         </div>
       </div>
     )

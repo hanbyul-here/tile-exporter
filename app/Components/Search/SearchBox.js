@@ -14,7 +14,7 @@ var SearchBox = React.createClass({
 
     var baseurl = 'https://search.mapzen.com/v1';
 
-    var callurl = baseurl + "/autocomplete?text=" + currentInput;
+    var callurl = baseurl + '/autocomplete'+'?text=' + currentInput;
     callurl += '&api_key=' + this.props.config.key;
 
     var request = new XMLHttpRequest();
@@ -36,6 +36,32 @@ var SearchBox = React.createClass({
     request.send();
   },
 
+  makeSearchCall: function(){
+
+    var baseurl = 'https://search.mapzen.com/v1';
+
+    var callurl = baseurl + '/search'+'?text=' + this.state.filterText;
+    callurl += '&api_key=' + this.props.config.key;
+
+    var request = new XMLHttpRequest();
+    request.open('GET', callurl, true);
+    request.onload = () => {
+      if (request.status >= 200 && request.status < 400) {
+        // Success!
+        var resp = JSON.parse(request.responseText);
+        this.setState({searchResult: resp.features})
+      } else {
+        // when there is no search result?
+      }
+    };
+
+    request.onerror = function() {
+      // when there is no search result / error?
+    };
+    request.send();
+  },
+
+
   componentWillMount: function() {
     //make search call debounce
     this.makeCall = debounce(function() {
@@ -47,7 +73,8 @@ var SearchBox = React.createClass({
     return {
       searchResult : [],
       dataIndex: -1,
-      filterText: this.props.label || ""
+      filterText: this.props.label || "",
+      endpoint: 'autocomplete'
     };
   },
 
@@ -63,8 +90,13 @@ var SearchBox = React.createClass({
 
     switch(key) {
       case 13:
-          var data = self.state.searchResult[currentDataIndex];
-          self.pointAction(data);
+        console.log(currentDataIndex);
+          if(currentDataIndex !== -1) {
+            var data = self.state.searchResult[currentDataIndex];
+            self.pointAction(data);
+          } else {
+            self.makeSearchCall();
+          }
       case 38:
         currentDataIndex--;
         currentDataIndex += self.state.searchResult.length;
@@ -142,7 +174,7 @@ var SearchBox = React.createClass({
     const { config } = this.props
     const { searchResult, dataIndex} = this.state
     return(
-      <div>
+      <div class="searchBoxContainer">
         <div
           className="search-icon" />
         <input

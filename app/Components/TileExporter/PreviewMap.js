@@ -76,17 +76,17 @@ var PreviewMap = (function() {
 
   function drawData() {
 
-    drawTheTile(buildQueryURL(-1,-1), neSvg)
+    drawTheTile(buildQueryURL(1,-1), neSvg)
     drawTheTile(buildQueryURL(0,-1), nSvg)
-    drawTheTile(buildQueryURL(1,-1), nwSvg)
+    drawTheTile(buildQueryURL(-1,-1), nwSvg)
 
-    drawTheTile(buildQueryURL(-1,0), eSvg)
+    drawTheTile(buildQueryURL(1,0), eSvg)
     drawTheTile(buildQueryURL(0,0), svg)
-    drawTheTile(buildQueryURL(1,0), wSvg)
+    drawTheTile(buildQueryURL(-1,0), wSvg)
 
-    drawTheTile(buildQueryURL(-1,1), seSvg)
+    drawTheTile(buildQueryURL(1,1), seSvg)
     drawTheTile(buildQueryURL(0,1), sSvg)
-    drawTheTile(buildQueryURL(1,1), swSvg)
+    drawTheTile(buildQueryURL(-1,1), swSvg)
 
   }
 
@@ -146,19 +146,19 @@ var PreviewMap = (function() {
     var inputLat = store.getState().lat;//parseFloat(lat);//40.7142700;
     var zoom = store.getState().zoom;
 
+    console.log(store.getState())
+
     //falttening geocode by converting them to mercator tile nums
-    var tileLon = long2tile(inputLon, zoom);
-    var tileLat = lat2tile(inputLat , zoom);
+    var tLon = long2tile(inputLon, zoom) + eastWest;
+    var tLat = lat2tile(inputLat , zoom) + northSouth;
 
-    tileLon += eastWest;
-    tileLat += northSouth;
 
-    var callURL =  config.baseURL + '/' + config.dataKind + '/' + zoom + '/' + tileLon + '/' + tileLat + '.' + config.fileFormat + '?api_key=' + Key.vectorTile;
+    var callURL =  config.baseURL + '/' + config.dataKind + '/' + zoom + '/' + tLon + '/' + tLat + '.' + config.fileFormat + '?api_key=' + Key.vectorTile;
 
 
     var centerLatLon =  {
-      lat: tile2Lat(tileLat, zoom),
-      lon: tile2Lon(tileLon, zoom)
+      lat: tile2Lat(tLat, zoom),
+      lon: tile2Lon(tLon, zoom)
     }
     return {
       callURL: callURL,

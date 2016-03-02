@@ -42,7 +42,7 @@ div[id^="preview"] {
 
 #preview-north-east {
   top: 0px;
-  left: 0px;
+  left: 200px;
   &:hover:before {
     content: 'NE';
   }
@@ -54,13 +54,13 @@ div[id^="preview"] {
 }
 #preview-north-west {
   top: 0px;
-  left: 200px;
+  left: 0px;
   &:hover:before { content: 'NW';}
 }
 
 #preview-east {
   top:100px;
-  left: 0px;
+  left: 200px;
   &:hover:before { content: 'E';}
 }
 #preview-center {top:100px; left: 100px;
@@ -70,13 +70,13 @@ div[id^="preview"] {
 }
 #preview-west {
   top:100px;
-  left: 200px;
+  left: 0px;
   &:hover:before { content: 'W'}
 }
 
 #preview-south-east {
   top: 200px;
-  left: 0px;
+  left: 200px;
   &:hover:before { content: 'SE'}
 }
 #preview-south {
@@ -86,6 +86,6 @@ div[id^="preview"] {
 }
 #preview-south-west {
   top: 200px;
-  left: 200px;
+  left: 0px;
   &:hover:before {content: 'SW'}
 }

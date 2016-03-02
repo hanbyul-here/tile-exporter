@@ -9,9 +9,8 @@ import PreviewMap from './PreviewMap'
 
 import Key from '../../Keys'
 
-
 import store from '../../Redux/Store'
-import {updateZoom, updatePointZoom} from '../../Redux/Action'
+import {updateZoom, updatePoint} from '../../Redux/Action'
 import reducer from '../../Redux/Reducer'
 
 var TileExporter = (function() {
@@ -100,24 +99,47 @@ var TileExporter = (function() {
       fetchTheTile(buildQueryURL());
     });
 
-    // var upBtn = document.getElementById('go-up');
-    // var downBtn = document.getElementById('go-down');
-    // var leftBtn = document.getElementById('go-left');
-    // var rightBtn = document.getElementById('go-right');
+     var nwBtn = document.getElementById('preview-north-west');
+     var nBtn = document.getElementById('preview-north');
+     var neBtn = document.getElementById('preview-north-east');
 
-    // upBtn.addEventListener('click', function() {
-    //   navigateTile('ver',-1)
-    // });
-    // downBtn.addEventListener('click', function() {
-    //   navigateTile('ver',1)
-    // });
+     var wBtn = document.getElementById('preview-west');
 
-    // leftBtn.addEventListener('click', function() {
-    //   navigateTile('hoz',-1)
-    // });
-    // rightBtn.addEventListener('click', function() {
-    //   navigateTile('hoz',1)
-    // });
+     var eBtn = document.getElementById('preview-east');
+
+     var swBtn = document.getElementById('preview-south-west');
+     var sBtn = document.getElementById('preview-south');
+     var seBtn = document.getElementById('preview-south-east');
+
+
+    //navigating tile
+    nwBtn.addEventListener('click', function() {
+      navigateTile(-1,-1)
+    });
+    nBtn.addEventListener('click', function() {
+      navigateTile(0,-1)
+    });
+    neBtn.addEventListener('click', function() {
+      navigateTile(1,-1)
+    });
+
+    wBtn.addEventListener('click', function() {
+      navigateTile(-1,0)
+    });
+    eBtn.addEventListener('click', function() {
+      navigateTile(1,0)
+    });
+
+
+    swBtn.addEventListener('click', function() {
+      navigateTile(-1,1)
+    });
+    sBtn.addEventListener('click', function() {
+      navigateTile(0,1)
+    });
+    seBtn.addEventListener('click', function() {
+      navigateTile(1,1)
+    });
 
     var zoomRad = document.zoomRadio.zoomLevel;
     var prev = null;
@@ -175,25 +197,33 @@ var TileExporter = (function() {
 
 
 
-  function navigateTile(direction, directionNum) {
+  function navigateTile(eastWest, northSouth) {
 
-    if(direction === 'hoz') {
-      tileLon += directionNum;
-    } else {
-      tileLat += directionNum;
+
+    tileLon += eastWest;
+    tileLat += northSouth;
+
+    var zoom = store.getState().zoom;
+
+    var callURL =  config.baseURL + '/' + config.dataKind + '/' + zoom + '/' + tileLon + '/' + tileLat + '.' + config.fileFormat + '?api_key=' + Key.vectorTile;
+    var centerLon = tile2Lon(tileLon, zoom);
+    var centerLat = tile2Lat(tileLat, zoom);
+
+    var lonLatZoom = {
+      lon: centerLon,
+      lat: centerLat,
+      zoom: zoom
     }
-    var callURL =  config.baseURL + '/' + config.dataKind + '/' + config.zoomLevel + '/' + tileLon + '/' + tileLat + '.' + config.fileFormat + '?api_key=' + Key.vectorTile;
 
+    store.dispatch(updatePoint({
+      lon: centerLon,
+      lat: centerLat
+    }))
+
+    //store.dispatch(updatePointZoom(lonLatZoom))
     fetchTheTile(callURL);
 
-    var centerLon = tile2Lon(tileLon, config.zoomLevel);
-    var centerLat = tile2Lat(tileLat, config.zoomLevel);
-
-    updateQueryString({
-      'lon': centerLon,
-      'lat': centerLat,
-      'zoom': config.zoomLevel
-    })
+    updateQueryString(lonLatZoom)
 
     document.getElementById('lat').value = centerLat;
     document.getElementById('lon').value = centerLon;
