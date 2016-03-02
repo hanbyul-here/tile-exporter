@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="https://mapzen.com/common/styleguide/styles/styleguide.css">
+<link rel="stylesheet" href="https://cdn.rawgit.com/hanbyul-here/vector-tile-obj-exporter/gh-pages/css/main.css">
+<body>
+
+    <div id="main-control" class="control">
+      <div class="row">
+        <div class="col-sm-12">
+          3D print your favorite map tile. Enter your coordinates to generate an OBJ file that you can send to a 3D printer!
+        </div>
+      </div>
+      <hr>
+      <div id="search-bar"></div>
+      <div class="form-group">
+        <label for="lon">Longitude</label>
+        <input type="text" class="form-control" id="lon" placeholder="-74.0059700"/>
+      </div>
+      <div class="form-group">
+        <label for="lat">Latitude</label>
+        <input type="text" class="form-control" id="lat" placeholder="40.7142700"/>
+      </div>
+      <div class="row">
+        <div class="col-sm-12">
+          <label for="zoomRadio">Zoom Level</label>
+          <form name="zoomRadio" class="radio">
+            <div class="radio-inline">
+              <label><input type="radio" name="zoomLevel" value="16" checked="checked">16</label>
+            </div>
+            <div class="radio-inline">
+              <label><input type="radio" name="zoomLevel" value="17">17</label>
+            </div>
+            <div class="radio-inline">
+              <label><input type="radio" name="zoomLevel" value="18">18</label>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="marginTopDown">
+        <div class="row ">
+          <div class="col-sm-12 text-center">
+            <button class="form-control btn btn-mapzen" id="exportBtn"> Preview the tile</button>
+          </div>
+        </div>
+      </div>
+      <div class="marginTopDown">
+        <div class="row">
+          <div class="col-sm-12 text-center">
+            <a id="exportA" class="disabled"><i class="fa fa-caret-right"></i> Download <i class="fa fa-caret-left"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="control-toggle text-right">
+        <a id="hide-toggle">Hide control</a>
+    </div>
+
+    <div class="navigation">
+           <div class="direction-control">
+<!--             <button class="btn btn-transparent" id ="go-up"><i class="fa fa-arrow-up"></i></button>
+            <button class="btn btn-transparent" id ="go-left"><i class="fa fa-arrow-left"></i></button>
+            <button class="btn btn-transparent" id ="go-down"><i class="fa fa-arrow-down"></i></button>
+            <button class="btn btn-transparent" id ="go-right"><i class="fa fa-arrow-right"></i></button> -->
+            <div id ="preview-north-east"></div>
+            <div id ="preview-north"></div>
+            <div id ="preview-north-west"></div>
+            <div id ="preview-east"></div>
+            <div id ="preview-center"></div>
+            <div id ="preview-west"></div>
+            <div id ="preview-south-east"></div>
+            <div id ="preview-south"></div>
+            <div id ="preview-south-west"></div>
+          </div>
+    </div>
+
+  <div class="cc">
+    © <a href="http://www.openstreetmap.org/">OSM</a> contributors | <a href="https://mapzen.com">Mapzen</a> | <a href="https://github.com/hanbyul-here/vector-tile-obj-exporter">Github Repo</a>
+  </div>
+
+  <div id="loading-bar" class="loading-bar"></div>
+
+  <script src="bundle.js"></script>
+<!--   <script src="https://cdn.rawgit.com/hanbyul-here/vector-tile-obj-exporter/gh-pages/js/vendor/three.js"></script>
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <script src="https://cdn.rawgit.com/hanbyul-here/vector-tile-obj-exporter/gh-pages/js/vendor/OBJExporter.js"></script>
+  <script src="https://cdn.rawgit.com/hanbyul-here/vector-tile-obj-exporter/gh-pages/js/vendor/OrbitControls.js"></script>
+  <script src="https://cdn.rawgit.com/hanbyul-here/vector-tile-obj-exporter/gh-pages/js/vendor/d3-threeD.js"></script>
+  <script src="https://cdn.rawgit.com/hanbyul-here/vector-tile-obj-exporter/gh-pages/js/PreviewMap.js"></script>
+  <script src="https://cdn.rawgit.com/hanbyul-here/vector-tile-obj-exporter/gh-pages/js/tile-exporter.js"></script> -->
+</body>
+</html>
