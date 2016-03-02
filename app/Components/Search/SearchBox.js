@@ -125,8 +125,8 @@ var SearchBox = React.createClass({
     };
 
     var latLon = {
-      lat: data.geometry.coordinates[1],
-      lon: data.geometry.coordinates[0]
+      lat: selectedPoint.lat,
+      lon: selectedPoint.lon
     }
 
     store.dispatch(updatePoint(latLon));
@@ -135,6 +135,9 @@ var SearchBox = React.createClass({
     this.setState({
       dataIndex: -1
     });
+
+    document.getElementById('lon').innerHTML = latLon.lon
+    document.getElementById('lat').innerHTML = latLon.lat
 
   },
 

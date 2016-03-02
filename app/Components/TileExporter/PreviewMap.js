@@ -146,8 +146,6 @@ var PreviewMap = (function() {
     var inputLat = store.getState().lat;//parseFloat(lat);//40.7142700;
     var zoom = store.getState().zoom;
 
-    console.log(store.getState())
-
     //falttening geocode by converting them to mercator tile nums
     var tLon = long2tile(inputLon, zoom) + eastWest;
     var tLat = lat2tile(inputLat , zoom) + northSouth;

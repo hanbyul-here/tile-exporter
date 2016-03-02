@@ -64,7 +64,7 @@ div[id^="preview"] {
   &:hover:before { content: 'E';}
 }
 #preview-center {top:100px; left: 100px;
-  fill: #fff;
+  fill: rgba(255,255,255,0.8);
   stroke: #000;
   z-index: 5;
 }

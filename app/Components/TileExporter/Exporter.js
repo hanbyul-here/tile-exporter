@@ -10,7 +10,7 @@ import PreviewMap from './PreviewMap'
 import Key from '../../Keys'
 
 import store from '../../Redux/Store'
-import {updateZoom, updatePoint} from '../../Redux/Action'
+import {updateZoom, updatePoint, updatePointZoom} from '../../Redux/Action'
 import reducer from '../../Redux/Reducer'
 
 var TileExporter = (function() {
@@ -176,22 +176,26 @@ var TileExporter = (function() {
 
 
   function checkQueries() {
-    var lon = getParameterByName('lon');
-    var lat = getParameterByName('lat');
-    var zoom = getParameterByName('zoom');
+    var _lon = getParameterByName('lon');
+    var _lat = getParameterByName('lat');
+    var _zoom = getParameterByName('zoom');
 
-    if(lon !== null && lat !== null && zoom !== null) {
+    if(_lon !== null && _lat !== null && _zoom !== null) {
 
-      zoom = zoom.replace(/[^0-9]+/g, '');
+      _zoom = _zoom.replace(/[^0-9]+/g, '');
 
-      document.getElementById('lat').value = lat;
-      document.getElementById('lon').value = lon;
+      document.getElementById('lat').innerHTML = _lat;
+      document.getElementById('lon').innerHTML = _lon;
 
-      document.zoomRadio.zoomLevel.value = zoom;
-      config.zoomLevel = zoom;
+      document.zoomRadio.zoomLevel.value = _zoom;
+      config.zoomLevel = _zoom;
 
+      store.dispatch(updatePointZoom({
+        lat: _lat,
+        lon: _lon,
+        zoom: _zoom
+      }))
       fetchTheTile(buildQueryURL());
-
     }
   }
 
@@ -225,14 +229,13 @@ var TileExporter = (function() {
 
     updateQueryString(lonLatZoom)
 
-    document.getElementById('lat').value = centerLat;
-    document.getElementById('lon').value = centerLon;
+    document.getElementById('lat').innerHTML = centerLat;
+    document.getElementById('lon').innerHTML = centerLon;
 
   }
 
   function buildQueryURL() {
 
-    console.log(store.getState())
     var inputLon = store.getState().lon; //parseFloat(lon);//-74.0059700;
     var inputLat = store.getState().lat;//parseFloat(lat);//40.7142700;
     var zoom = store.getState().zoom;
@@ -379,18 +382,19 @@ var TileExporter = (function() {
             amount: amount/ 6,
             bevelEnabled: false
           });
+
+          for(k = 0; k< shape3d.vertices.length; k++) {
+             var v = shape3d.vertices[k];
+             v.setY(-v.y);
+          }
+
+          var mesh = new THREE.Mesh(shape3d, material);
+          reverseWindingOrder(mesh);
+          buildingGroup.add(mesh);
         } catch(e) {
           console.log('it could not exturde geometry, it can be because of duplicated point of svg.');
         }
 
-        for(k = 0; k< shape3d.vertices.length; k++) {
-           var v = shape3d.vertices[k];
-           v.setY(-v.y);
-        }
-
-        var mesh = new THREE.Mesh(shape3d, material);
-        reverseWindingOrder(mesh);
-        buildingGroup.add(mesh);
       }
     }
     enableDownloadLink();

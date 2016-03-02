@@ -38,6 +38,18 @@ html,body{
   }
 }
 
+.form-group {
+  .label {
+    font-style: italic;
+    display: inline;
+  }
+  .geocode {
+    font-weight: 400;
+    display: inline;
+    border-bottom: 1px solid #ccc;
+  }
+}
+
 #exportA {
   font-size: 18px;
 }
