@@ -5,6 +5,7 @@
   margin-bottom: 20px;
   background-color: #fff;
   position: relative;
+  z-index: 300;
 
   .search-icon {
     width: 30px;
@@ -42,7 +43,7 @@
   .table-view.search-table {
     padding-left: 0;
     max-height: 150px;
-    overflow-y: scroll;
+    overflow-y: auto;
     position: absolute;
 
     top: 100%;
