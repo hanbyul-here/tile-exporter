@@ -12,8 +12,7 @@ var PreviewMap = (function() {
   var width,height;
   var neSvg, nSvg, nwSvg, eSvg, svg, wSvg, seSvg, sSvg, swSvg;
 
-  var previewProjection;
-
+  var tileLon, tileLat;
 
   var config = {
     baseURL: "http://vector.mapzen.com/osm",
@@ -74,7 +73,10 @@ var PreviewMap = (function() {
 
   }
 
-  function drawData() {
+  function drawData(_tileLon, _tileLat) {
+
+    tileLon = _tileLon
+    tileLat = _tileLat
 
     drawTheTile(buildQueryURL(1,-1), neSvg)
     drawTheTile(buildQueryURL(0,-1), nSvg)
@@ -95,29 +97,29 @@ var PreviewMap = (function() {
     var zoom = store.getState().zoom
 
     d3.json(url.callURL, function(err,json) {
-            previewProjection = d3.geo.mercator()
-      .center([url.centerLatLon.lon, url.centerLatLon.lat])
-      //this are carved based on zoom 16, fit into 100px * 100px rect
-      .scale(600000* 100/57 * Math.pow(2,(zoom-16)))
-      .precision(.0)
-      .translate([0, 0])
+      var previewProjection = d3.geo.mercator()
+        .center([url.centerLatLon.lon, url.centerLatLon.lat])
+        //this are carved based on zoom 16, fit into 100px * 100px rect
+        .scale(600000* 100/57 * Math.pow(2,(zoom-16)))
+        .precision(.0)
+        .translate([0, 0])
 
-    if(err) console.log('err!');
+      if(err) console.log('err!');
 
-    else {
-      for(var obj in json) {
-        var j;
+      else {
+        for(var obj in json) {
+          var j;
 
-        for(j = 0; j< json[obj].features.length; j++) {
-          var geoFeature = json[obj].features[j];
-          var previewPath = d3.geo.path().projection(previewProjection);
-          var previewFeature = previewPath(geoFeature);
+          for(j = 0; j< json[obj].features.length; j++) {
+            var geoFeature = json[obj].features[j];
+            var previewPath = d3.geo.path().projection(previewProjection);
+            var previewFeature = previewPath(geoFeature);
 
-          if(previewFeature !== undefined) {
-             if(previewFeature.indexOf('a') > 0) ;
-             else {
-              element.append('path')
-                .attr('d', previewFeature);
+            if(previewFeature !== undefined) {
+               if(previewFeature.indexOf('a') > 0) ;
+              else {
+               element.append('path')
+                  .attr('d', previewFeature);
               }
             }
           }
@@ -142,13 +144,13 @@ var PreviewMap = (function() {
 
   function buildQueryURL(eastWest, northSouth) {
 
-    var inputLon = store.getState().lon; //parseFloat(lon);//-74.0059700;
-    var inputLat = store.getState().lat;//parseFloat(lat);//40.7142700;
-    var zoom = store.getState().zoom;
+    // var inputLon = store.getState().lon; //parseFloat(lon);//-74.0059700;
+    // var inputLat = store.getState().lat;//parseFloat(lat);//40.7142700;
+     var zoom = store.getState().zoom;
 
     //falttening geocode by converting them to mercator tile nums
-    var tLon = long2tile(inputLon, zoom);
-    var tLat = lat2tile(inputLat , zoom);
+    var tLon = tileLon;//= long2tile(inputLon, zoom);
+    var tLat = tileLat;//= lat2tile(inputLat , zoom);
 
     tLon += eastWest;
     tLat += northSouth;

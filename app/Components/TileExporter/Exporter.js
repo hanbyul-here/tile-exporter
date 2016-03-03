@@ -288,7 +288,7 @@ var TileExporter = (function() {
       .precision(.0)
       .translate([0,0])
     //draw previewmap
-    PreviewMap.drawData();
+    PreviewMap.drawData(tileLon, tileLat);
 
     // converting d3 path(svg) to three shape
     //converting geocode to mercator tile nums
