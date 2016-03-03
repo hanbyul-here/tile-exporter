@@ -32,6 +32,6 @@ function tileInfo(state = initialState, action = {}) {
       return state;
   }
 }
-console.log(tileInfo);
+
 module.exports = tileInfo;
 

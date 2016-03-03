@@ -57,8 +57,8 @@ var TileExporter = (function() {
     scene.add( light );
 
     /// ambient light
-    // var ambientLight = new THREE.AmbientLight(0x404040);
-    // scene.add( ambientLight );
+     var ambientLight = new THREE.AmbientLight(0xffffff);
+     scene.add( ambientLight );
 
     //orbit control
     controls = new OrbitControls( camera, renderer.domElement );
@@ -252,7 +252,6 @@ var TileExporter = (function() {
     tileLon = long2tile(inputLon, zoom);
     tileLat = lat2tile(inputLat , zoom);
 
-
     var callURL =  config.baseURL + '/' + config.dataKind + '/' + zoom + '/' + tileLon + '/' + tileLat + '.' + config.fileFormat + '?api_key=' + Key.vectorTile;
     return callURL;
   }
@@ -442,7 +441,7 @@ var TileExporter = (function() {
     var buildingObj = exportToObj()
     var exportA = document.getElementById('exportA');
     exportA.className = "";
-    exportA.download = 'tile.obj';
+    exportA.download = 'tile'+tileLon +'-'+tileLat+'-'+store.getState().zoom+'.obj';
 
     var blob = new Blob([buildingObj], {type: 'text'});
     var url = URL.createObjectURL(blob);

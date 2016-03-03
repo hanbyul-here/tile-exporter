@@ -147,12 +147,13 @@ var PreviewMap = (function() {
     var zoom = store.getState().zoom;
 
     //falttening geocode by converting them to mercator tile nums
-    var tLon = long2tile(inputLon, zoom) + eastWest;
-    var tLat = lat2tile(inputLat , zoom) + northSouth;
+    var tLon = long2tile(inputLon, zoom);
+    var tLat = lat2tile(inputLat , zoom);
 
+    tLon += eastWest;
+    tLat += northSouth;
 
     var callURL =  config.baseURL + '/' + config.dataKind + '/' + zoom + '/' + tLon + '/' + tLat + '.' + config.fileFormat + '?api_key=' + Key.vectorTile;
-
 
     var centerLatLon =  {
       lat: tile2Lat(tLat, zoom),
@@ -175,7 +176,6 @@ var PreviewMap = (function() {
 
 
 
-
 ////here all maps spells are!
 //convert lat/lon to mercator style number
 function long2tile(lon,zoom) {
@@ -195,43 +195,3 @@ function tile2Lat(tileLat, zoom) {
 }
 
 module.exports = PreviewMap
-
-// import d3 from 'd3'
-
-// var PreviewMap = (function() {
-
-//   var width,height;
-//   var svg;
-
-
-//   function init() {
-
-//     width = 100;
-//     height = 100;
-
-//     svg = d3.select('#svg-preview-map')
-//             .append('svg')
-//             .attr('width',width)
-//             .attr('height',height);
-//   }
-
-//   function drawData(feature) {
-
-//     svg.append('path')
-//       .attr('class','preview-path')
-//       .attr('d', feature);
-//   }
-
-//   function destroy() {
-//     svg.selectAll('*').remove();
-//   }
-
-//   init();
-
-//   return {
-//     drawData: drawData,
-//     destroy: destroy
-//   }
-// })();
-
-// module.exports = PreviewMap;
