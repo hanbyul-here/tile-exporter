@@ -178,11 +178,11 @@ var PreviewMap = (function() {
 
 
 function tile2Lon(tileLon, zoom) {
-  return (tileLon*360/Math.pow(2,zoom)-180).toFixed(6);
+  return (tileLon*360/Math.pow(2,zoom)-180).toFixed(10);
 }
 
 function tile2Lat(tileLat, zoom) {
-  return ((360/Math.PI) * Math.atan(Math.pow( Math.E, (Math.PI - 2*Math.PI*tileLat/(Math.pow(2,zoom)))))-90).toFixed(6);
+  return ((360/Math.PI) * Math.atan(Math.pow( Math.E, (Math.PI - 2*Math.PI*tileLat/(Math.pow(2,zoom)))))-90).toFixed(10);
 }
 
 module.exports = PreviewMap
