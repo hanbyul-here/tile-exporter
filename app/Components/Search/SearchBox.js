@@ -136,8 +136,9 @@ var SearchBox = React.createClass({
       dataIndex: -1
     });
 
-    document.getElementById('lon').innerHTML = latLon.lon
-    document.getElementById('lat').innerHTML = latLon.lat
+    document.getElementById('exportBtn').disabled  = false;
+    document.getElementById('lon').innerHTML = latLon.lon;
+    document.getElementById('lat').innerHTML = latLon.lat;
 
   },
 
@@ -196,5 +197,16 @@ var SearchBox = React.createClass({
     );
   }
 });
+
+
+////here all maps spells are!
+//convert lat/lon to mercator style number
+function long2tile(lon,zoom) {
+  return (Math.floor((lon+180)/360*Math.pow(2,zoom)));
+}
+function lat2tile(lat,zoom)  {
+  return (Math.floor((1-Math.log(Math.tan(lat*Math.PI/180) + 1/Math.cos(lat*Math.PI/180))/Math.PI)/2 *Math.pow(2,zoom)));
+}
+
 
 module.exports = SearchBox;

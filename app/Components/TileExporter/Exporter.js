@@ -28,7 +28,7 @@ var TileExporter = (function() {
 
   var config = {
     baseURL: "http://vector.mapzen.com/osm",
-    dataKind: "earth,water,buildings",
+    dataKind: "earth,water,buildings,landuse",
     fileFormat: "json",
     zoomLevel: 16
   }
@@ -180,6 +180,7 @@ var TileExporter = (function() {
     var _lat = getParameterByName('lat');
     var _zoom = getParameterByName('zoom');
 
+
     if(_lon !== null && _lat !== null && _zoom !== null) {
 
       _zoom = _zoom.replace(/[^0-9]+/g, '');
@@ -196,6 +197,7 @@ var TileExporter = (function() {
         zoom: _zoom
       }))
       fetchTheTile(buildQueryURL());
+      document.getElementById('exportBtn').disabled  = false;
     }
   }
 
@@ -497,11 +499,11 @@ function lat2tile(lat,zoom)  {
 
 //shold check it will work
 function tile2Lon(tileLon, zoom) {
-  return (tileLon*360/Math.pow(2,zoom)-180);
+  return (tileLon*360/Math.pow(2,zoom)-180).toFixed(6);
 }
 
 function tile2Lat(tileLat, zoom) {
-  return ((360/Math.PI) * Math.atan(Math.pow( Math.E, (Math.PI - 2*Math.PI*tileLat/(Math.pow(2,zoom)))))-90);
+  return ((360/Math.PI) * Math.atan(Math.pow( Math.E, (Math.PI - 2*Math.PI*tileLat/(Math.pow(2,zoom)))))-90).toFixed(6);
 }
 
 
