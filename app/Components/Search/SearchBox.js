@@ -90,7 +90,6 @@ var SearchBox = React.createClass({
 
     switch(key) {
       case 13:
-        console.log(currentDataIndex);
           if(currentDataIndex !== -1) {
             var data = self.state.searchResult[currentDataIndex];
             self.pointAction(data);

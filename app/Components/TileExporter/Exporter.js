@@ -205,35 +205,37 @@ var TileExporter = (function() {
 
   function navigateTile(eastWest, northSouth) {
 
+    if(tileLon) {
+      tileLon += eastWest;
+      tileLat += northSouth;
 
-    tileLon += eastWest;
-    tileLat += northSouth;
+      var zoom = store.getState().zoom;
 
-    var zoom = store.getState().zoom;
+      var callURL =  config.baseURL + '/' + config.dataKind + '/' + zoom + '/' + tileLon + '/' + tileLat + '.' + config.fileFormat + '?api_key=' + Key.vectorTile;
+      var centerLon = tile2Lon(tileLon, zoom);
+      var centerLat = tile2Lat(tileLat, zoom);
 
-    var callURL =  config.baseURL + '/' + config.dataKind + '/' + zoom + '/' + tileLon + '/' + tileLat + '.' + config.fileFormat + '?api_key=' + Key.vectorTile;
-    var centerLon = tile2Lon(tileLon, zoom);
-    var centerLat = tile2Lat(tileLat, zoom);
+      var lonLatZoom = {
+        lon: centerLon,
+        lat: centerLat,
+        zoom: zoom
+      }
 
-    var lonLatZoom = {
-      lon: centerLon,
-      lat: centerLat,
-      zoom: zoom
+      store.dispatch(updatePoint({
+        lon: centerLon,
+        lat: centerLat
+      }))
+
+      //store.dispatch(updatePointZoom(lonLatZoom))
+      fetchTheTile(callURL);
+
+      updateQueryString(lonLatZoom)
+
+      document.getElementById('lat').innerHTML = centerLat;
+      document.getElementById('lon').innerHTML = centerLon;
+    } else {
+      console.log('please select a place')
     }
-
-    store.dispatch(updatePoint({
-      lon: centerLon,
-      lat: centerLat
-    }))
-
-    //store.dispatch(updatePointZoom(lonLatZoom))
-    fetchTheTile(callURL);
-
-    updateQueryString(lonLatZoom)
-
-    document.getElementById('lat').innerHTML = centerLat;
-    document.getElementById('lon').innerHTML = centerLon;
-
   }
 
   function buildQueryURL() {
