@@ -365,9 +365,23 @@ var TileExporter = (function() {
 
     var color = new THREE.Color("#5c5c5c");
 
-    material = new THREE.MeshLambertMaterial({
-      color: color
-    });
+    // material = new THREE.MeshLambertMaterial({
+    //   color: color
+    // });
+    
+    var uniforms = {
+                    time: { type: "f", value: 1.0 },
+                    resolution: { type: "v2", value: new THREE.Vector2() }
+                };
+
+    console.log(document.getElementById( 'vertexShader' ).textContent)
+
+    material = new THREE.ShaderMaterial( {
+      uniforms: uniforms,
+      vertexShader: document.getElementById( 'vertexShader' ).textContent,
+      fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
+      side: THREE.DoubleSide
+    } );
 
     var i,j,k,len1;
 

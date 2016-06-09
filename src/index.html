@@ -91,13 +91,25 @@
 
   <div id="loading-bar" class="loading-bar"></div>
 
+        <script id="vertexShader" type="x-shader/x-vertex">
+
+            varying vec2 vUv;
+
+            void main()
+            {
+                vUv = uv;
+                vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+                gl_Position = projectionMatrix * mvPosition;
+            }
+
+        </script>
+
+        <script id="fragmentShader" type="x-shader/x-fragment">
+      void main(void) {
+        gl_FragColor = vec4(1.0, .3, 1.0, 1.0);
+      }
+        </script>
   <script src="bundle.js"></script>
-<!--   <script src="https://cdn.rawgit.com/hanbyul-here/vector-tile-obj-exporter/gh-pages/js/vendor/three.js"></script>
-  <script src="http://d3js.org/d3.v3.min.js"></script>
-  <script src="https://cdn.rawgit.com/hanbyul-here/vector-tile-obj-exporter/gh-pages/js/vendor/OBJExporter.js"></script>
-  <script src="https://cdn.rawgit.com/hanbyul-here/vector-tile-obj-exporter/gh-pages/js/vendor/OrbitControls.js"></script>
-  <script src="https://cdn.rawgit.com/hanbyul-here/vector-tile-obj-exporter/gh-pages/js/vendor/d3-threeD.js"></script>
-  <script src="https://cdn.rawgit.com/hanbyul-here/vector-tile-obj-exporter/gh-pages/js/PreviewMap.js"></script>
-  <script src="https://cdn.rawgit.com/hanbyul-here/vector-tile-obj-exporter/gh-pages/js/tile-exporter.js"></script> -->
+
 </body>
 </html>
