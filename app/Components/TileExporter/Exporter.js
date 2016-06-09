@@ -25,6 +25,11 @@ var TileExporter = (function() {
   var dthreed = new D3d();
   var exporter = new OBJExporter();
 
+  var uniforms = {
+    time: { type: "f", value: 1.0 },
+    resolution: { type: "v2", value: new THREE.Vector2() }
+  };
+
 
   var config = {
     baseURL: "http://vector.mapzen.com/osm",
@@ -76,6 +81,9 @@ var TileExporter = (function() {
   function animate() {
     requestAnimationFrame( animate );
     controls.update();
+
+    uniforms.time.value += 0.05;
+
     renderer.render( scene, camera );
   }
 
@@ -368,19 +376,14 @@ var TileExporter = (function() {
     // material = new THREE.MeshLambertMaterial({
     //   color: color
     // });
-    
-    var uniforms = {
-                    time: { type: "f", value: 1.0 },
-                    resolution: { type: "v2", value: new THREE.Vector2() }
-                };
-
-    console.log(document.getElementById( 'vertexShader' ).textContent)
 
     material = new THREE.ShaderMaterial( {
       uniforms: uniforms,
       vertexShader: document.getElementById( 'vertexShader' ).textContent,
       fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
-      side: THREE.DoubleSide
+      side: THREE.DoubleSide,
+      shading: THREE.FlatShading,
+      fog: true
     } );
 
     var i,j,k,len1;
