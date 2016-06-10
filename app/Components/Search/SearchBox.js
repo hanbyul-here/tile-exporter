@@ -177,7 +177,7 @@ var SearchBox = React.createClass({
     const { config } = this.props
     const { searchResult, dataIndex} = this.state
     return(
-      <div class="searchBoxContainer">
+      <div className="searchBoxContainer">
         <div
           className="search-icon" />
         <input
