@@ -57,7 +57,7 @@
       </div>
       <div class="marginTopDown">
         <div class="row">
-          <div class="col-sm-12 text-center">
+          <div class="col-sm-11 text-center">
             <a id="exportA" class="disabled"><i class="fa fa-caret-right"></i> Download <i class="fa fa-caret-left"></i></a>
             <span class="rainbow"></span>
           </div>
@@ -104,17 +104,22 @@
     uniform float time;
     uniform vec2 resolution;
     varying vec2 vUv;
-    //  Tweaked Function from Iñigo Quiles
+    //  Function from Iñigo Quiles
     //  https://www.shadertoy.com/view/MsS3Wc
     vec3 hsb2rgb( in vec3 c ){
-      vec3 rgb = clamp(abs(mod(c.x*6.0+vec3(0.0,4.0,2.0),
-                                 6.0)-3.0)-1.0,0.2,0.7 );
-      rgb = rgb*rgb*(7.0-1.0*rgb);
-      return c.z * mix(vec3(1.0), rgb, c.y);
+      // vec3 rgb = clamp(abs(mod(c.x*6.0+vec3(0.0,4.0,2.0),6.0)-3.0)-1.0,0.2,0.7 );
+      // rgb = rgb*rgb*(7.0-1.0*rgb);
+      //return c.z * mix(vec3(1.0), rgb, c.y);
+          vec3 rgb = clamp(abs(mod(c.x*6.0+vec3(0.0,4.0,2.0),
+                             6.0)-3.0)-1.0,
+                     0.0,
+                     1.0 );
+    rgb = rgb*rgb*(3.0-2.0*rgb);
+    return c.z * mix( vec3(1.0), rgb, c.y);
     }
 
     void main( void ) {
-      vec2 st = 0.008 * vUv;
+      vec2 st = 0.01 * vUv;
       vec3 color = hsb2rgb(vec3(abs(sin(st.x+time*0.09)+0.01),abs(sin(time*0.1)+0.01),abs(sin(st.y+time*0.1)+0.01) ));
       gl_FragColor = vec4(color,0.7);
     }
