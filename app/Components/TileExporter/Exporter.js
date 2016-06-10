@@ -371,10 +371,12 @@ var TileExporter = (function() {
 
     var color = new THREE.Color("#5c5c5c");
 
+    // This is normal material for exporter
     // material = new THREE.MeshLambertMaterial({
     //   color: color
     // });
 
+    // This is rainbow shader material for pride month.
     material = new THREE.ShaderMaterial( {
       uniforms: uniforms,
       vertexShader: document.getElementById( 'vertexShader' ).textContent,
@@ -382,7 +384,7 @@ var TileExporter = (function() {
       side: THREE.DoubleSide,
       shading: THREE.FlatShading,
       fog: true
-    } );
+    });
 
     var i,j,k,len1;
 
