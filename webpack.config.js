@@ -24,7 +24,7 @@ const config = {
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NoErrorsPlugin()
   ],
-  devtool: 'eval',
+  devtool: 'cheap-module-source-map',
   module: {
     noParse: [],
     loaders: [{
