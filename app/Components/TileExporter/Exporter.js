@@ -81,9 +81,7 @@ var TileExporter = (function() {
   function animate() {
     requestAnimationFrame( animate );
     controls.update();
-
     uniforms.time.value += 0.05;
-
     renderer.render( scene, camera );
   }
 
@@ -315,7 +313,7 @@ var TileExporter = (function() {
             var previewPath = d3.geo.path().projection(previewProjection);
             var path = d3.geo.path().projection(projection);
 
-            var defaultHeight = 15;
+            var defaultHeight = 25;
 
             if(obj === 'earth') {
               var b = path.bounds(geoFeature);
@@ -323,11 +321,11 @@ var TileExporter = (function() {
               tileY = b[0][1];
               tileW = b[1][0] - b[0][0];
               tileH = b[1][1] - b[0][1];
-              defaultHeight = 3;
+              defaultHeight = 10;
             } else if(obj === 'water') {
-              defaultHeight = 1;
-            } else if(obj === 'landuse') {
               defaultHeight = 6;
+            } else if(obj === 'landuse') {
+              defaultHeight = 13;
             }
 
             //path = d3.geo.path().projection(projection);
@@ -342,7 +340,7 @@ var TileExporter = (function() {
               else {
                 var mesh = dthreed.exportSVG(feature);
                 buildings.push(mesh);
-                var h = geoFeature.properties['height'] || defaultHeight;
+                var h = (geoFeature.properties['height']+10) || defaultHeight;
                 heights.push(h);
               }
             }

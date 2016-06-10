@@ -69,10 +69,6 @@
 
     <div class="navigation">
            <div class="direction-control">
-<!--             <button class="btn btn-transparent" id ="go-up"><i class="fa fa-arrow-up"></i></button>
-            <button class="btn btn-transparent" id ="go-left"><i class="fa fa-arrow-left"></i></button>
-            <button class="btn btn-transparent" id ="go-down"><i class="fa fa-arrow-down"></i></button>
-            <button class="btn btn-transparent" id ="go-right"><i class="fa fa-arrow-right"></i></button> -->
             <div id ="preview-north-east"></div>
             <div id ="preview-north"></div>
             <div id ="preview-north-west"></div>
@@ -91,13 +87,37 @@
 
   <div id="loading-bar" class="loading-bar"></div>
 
+  <script id="vertexShader" type="x-shader/x-vertex">
+
+    varying vec2 vUv;
+
+    void main() {
+      vUv = uv;
+      vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+      gl_Position = projectionMatrix * mvPosition;
+    }
+  </script>
+
+  <script id="fragmentShader" type="x-shader/x-fragment">
+    uniform float time;
+    uniform vec2 resolution;
+    varying vec2 vUv;
+    //  Tweaked Function from Iñigo Quiles
+    //  https://www.shadertoy.com/view/MsS3Wc
+    vec3 hsb2rgb( in vec3 c ){
+      vec3 rgb = clamp(abs(mod(c.x*6.0+vec3(0.0,4.0,2.0),
+                                 6.0)-3.0)-1.0,0.2,0.7 );
+      rgb = rgb*rgb*(7.0-1.0*rgb);
+      return c.z * mix(vec3(1.0), rgb, c.y);
+    }
+
+    void main( void ) {
+      vec2 st = 0.008 * vUv;
+      vec3 color = hsb2rgb(vec3(abs(sin(st.x+time*0.09)+0.01),abs(sin(time*0.1)+0.01),abs(sin(st.y+time*0.1)+0.01) ));
+      gl_FragColor = vec4(color,0.7);
+    }
+    </script>
   <script src="bundle.js"></script>
-<!--   <script src="https://cdn.rawgit.com/hanbyul-here/vector-tile-obj-exporter/gh-pages/js/vendor/three.js"></script>
-  <script src="http://d3js.org/d3.v3.min.js"></script>
-  <script src="https://cdn.rawgit.com/hanbyul-here/vector-tile-obj-exporter/gh-pages/js/vendor/OBJExporter.js"></script>
-  <script src="https://cdn.rawgit.com/hanbyul-here/vector-tile-obj-exporter/gh-pages/js/vendor/OrbitControls.js"></script>
-  <script src="https://cdn.rawgit.com/hanbyul-here/vector-tile-obj-exporter/gh-pages/js/vendor/d3-threeD.js"></script>
-  <script src="https://cdn.rawgit.com/hanbyul-here/vector-tile-obj-exporter/gh-pages/js/PreviewMap.js"></script>
-  <script src="https://cdn.rawgit.com/hanbyul-here/vector-tile-obj-exporter/gh-pages/js/tile-exporter.js"></script> -->
+
 </body>
 </html>
