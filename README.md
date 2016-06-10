@@ -2,6 +2,8 @@
 
 [Try Tile Exporet!](http://hanbyul-here.github.io/tile-exporter/)
 
+Tile Exporter looks very festive to celebrate [LGBT Pride Month ](https://www.loc.gov/lgbt/about.html) now, but it usually looks like this.
+
 ![tile exporter screenshot](https://s3.amazonaws.com/assets-staging.mapzen.com/images/tile-exporter/tile-exporter-screenshot.png)
 
  The tile exporter grabs a [Mapzen vector tile](https://mapzen.com/projects/vector-tiles), offers you 3d preview in your browser, and then creates an .OBJ file of the scene that you can download. The tile exporter gets the `buildings`, `earth`, `water`, `landuse` layers of a tile. Learn more about layers in tiles at the [Mapzen Vector Tile documentation](https://mapzen.com/documentation/vector-tiles/layers/).
