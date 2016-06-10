@@ -15,7 +15,7 @@ var PreviewMap = (function() {
   var tileLon, tileLat;
 
   var config = {
-    baseURL: "http://vector.mapzen.com/osm",
+    baseURL: "https://vector.mapzen.com/osm",
     dataKind: "earth,water,buildings",
     fileFormat: "json"
   }
