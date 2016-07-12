@@ -25,12 +25,6 @@ var TileExporter = (function() {
   var dthreed = new D3d();
   var exporter = new OBJExporter();
 
-  var uniforms = {
-    time: { type: "f", value: 1.0 },
-    resolution: { type: "v2", value: new THREE.Vector2() }
-  };
-
-
   var config = {
     baseURL: "https://vector.mapzen.com/osm",
     dataKind: "earth,water,buildings,landuse",
@@ -81,7 +75,6 @@ var TileExporter = (function() {
   function animate() {
     requestAnimationFrame( animate );
     controls.update();
-    uniforms.time.value += 0.05;
     renderer.render( scene, camera );
   }
 
@@ -372,18 +365,8 @@ var TileExporter = (function() {
     var color = new THREE.Color("#5c5c5c");
 
     // This is normal material for exporter
-    // material = new THREE.MeshLambertMaterial({
-    //   color: color
-    // });
-
-    // This is rainbow shader material for pride month.
-    material = new THREE.ShaderMaterial( {
-      uniforms: uniforms,
-      vertexShader: document.getElementById( 'vertexShader' ).textContent,
-      fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
-      side: THREE.DoubleSide,
-      shading: THREE.FlatShading,
-      fog: true
+    material = new THREE.MeshLambertMaterial({
+      color: color
     });
 
     var i,j,k,len1;
