@@ -5,7 +5,6 @@ import Keys from './Keys'
 import CancelButton from './Components/Search/CancelButton'
 
 import SearchBox from './Components/Search/SearchBox'
-import LonLatInput from './Components/LonLatInput/LonLatInput'
 
 import TileExporter from './Components/TileExporter/Exporter'
 
