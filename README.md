@@ -24,8 +24,6 @@ npm build
 
 This command builds `index.html` and  `bundle.js` file on the directory.
 
-Please Mind that Tile exporter currently doesn't support Node v.6.0.0.
-
 There is also a [vanilla javascript version](https://github.com/hanbyul-here/vector-tile-obj-exporter) of this, if you prefer.
 
 - If you are interested in large scale, elevation data combined 3d print, check out [Vectiler](https://github.com/karimnaaji/vectiler).
