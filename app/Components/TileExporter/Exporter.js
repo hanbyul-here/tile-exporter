@@ -328,7 +328,8 @@ var TileExporter = (function() {
             if(feature !== undefined) {
               if(previewFeature.indexOf('a') > 0) ;
 
-              // 'a' command is not implemented in d3-three, skipiping for now.
+              // 'a' command is not implemented in d3-three, skipping for now.
+              // 'a' is SVG path command for Ellpitic Arc Curve. https://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands
               if(feature.indexOf('a') > 0) ;
               else {
                 var mesh = dthreed.exportSVG(feature);
