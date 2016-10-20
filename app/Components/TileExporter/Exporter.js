@@ -26,8 +26,8 @@ var TileExporter = (function() {
   var exporter = new OBJExporter();
 
   var config = {
-    baseURL: "https://vector.mapzen.com/osm",
-    dataKind: "earth,water,buildings,landuse",
+    baseURL: "https://tile.mapzen.com/mapzen/vector/v1",
+    dataKind: "all",
     fileFormat: "json",
     zoomLevel: 16
   }
@@ -128,7 +128,6 @@ var TileExporter = (function() {
     eBtn.addEventListener('click', function() {
       navigateTile(1,0)
     });
-
 
     swBtn.addEventListener('click', function() {
       navigateTile(-1,1)

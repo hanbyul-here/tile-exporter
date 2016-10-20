@@ -10,7 +10,6 @@ const config = {
     this.module.noParse.push(path);
   },
   entry: [
-    'webpack-hot-middleware/client',
     './app/App'
   ],
   output: {
