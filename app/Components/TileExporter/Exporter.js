@@ -305,7 +305,7 @@ var TileExporter = (function() {
             var previewPath = d3.geo.path().projection(previewProjection);
             var path = d3.geo.path().projection(projection);
 
-            var defaultHeight = 25;
+            var defaultHeight = 13;
 
             if(obj === 'earth') {
               var b = path.bounds(geoFeature);
@@ -317,7 +317,9 @@ var TileExporter = (function() {
             } else if(obj === 'water') {
               defaultHeight = 6;
             } else if(obj === 'landuse') {
-              defaultHeight = 13;
+              defaultHeight = 15;
+            } else if(obj === 'buildings') {
+              defaultHeight = 25;
             }
 
             //path = d3.geo.path().projection(projection);
