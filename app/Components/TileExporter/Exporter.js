@@ -334,9 +334,7 @@ var TileExporter = (function() {
               defaultHeight = 15;
             } else if(obj === 'buildings') {
               defaultHeight = 25;
-            } else {
-              defaultHeight = 0;
-            }
+            } 
 
             //path = d3.geo.path().projection(projection);
             var feature = path(geoFeature);
