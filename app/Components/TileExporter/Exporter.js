@@ -37,7 +37,7 @@ var TileExporter = (function() {
     h = window.innerHeight;
     /// Global : renderer
     renderer = new THREE.WebGLRenderer( { antialias: true } );
-    renderer.setClearColor( "0xb0b0b0" );
+    renderer.setClearColor( 0xb0b0b0 );
     renderer.setSize( w, h );
 
     /// Global : scene
@@ -276,7 +276,6 @@ var TileExporter = (function() {
     var centerLon = tile2Lon(tileLon, config.zoomLevel);
     var centerLat = tile2Lat(tileLat, config.zoomLevel);
 
-
     var previewProjection = d3.geo.mercator()
       .center([centerLon, centerLat])
       //this are carved based on zoom 16
@@ -289,6 +288,22 @@ var TileExporter = (function() {
       .scale(1000000)
       .precision(.0)
       .translate([0,0])
+
+    // Will flip the Y coordinates that result from the geo projection
+    var flipY = d3.geo.transform({
+      point : function(x,y){
+        this.stream.point(x,-y)
+      }
+    });
+
+    // Mercator Geo Projection then flipped in Y
+    // Solution taken from http://stackoverflow.com/a/31647135/3049530
+    var projection_then_flipY = {
+        stream: function(s) {
+            return projection.stream(flipY.stream(s));
+        }
+     };
+
     //draw previewmap
     PreviewMap.drawData(tileLon, tileLat);
 
@@ -297,13 +312,12 @@ var TileExporter = (function() {
     d3.json(callURL, function(err,json) {
       if(err) console.log('err!');
       else {
-        for(obj in json) {
-          var j;
-          for(j = 0; j< json[obj].features.length; j++) {
+        for(var obj in json) {
+          for(var j = 0; j< json[obj].features.length; j++) {
 
             var geoFeature = json[obj].features[j];
             var previewPath = d3.geo.path().projection(previewProjection);
-            var path = d3.geo.path().projection(projection);
+            var path = d3.geo.path().projection(projection_then_flipY);
 
             var defaultHeight = 13;
 
@@ -320,6 +334,8 @@ var TileExporter = (function() {
               defaultHeight = 15;
             } else if(obj === 'buildings') {
               defaultHeight = 25;
+            } else {
+              defaultHeight = 0;
             }
 
             //path = d3.geo.path().projection(projection);
@@ -349,7 +365,7 @@ var TileExporter = (function() {
         buildingGroup = new THREE.Group();
         //buildingGroup.rotation.x = Math.PI;
         buildingGroup.translateX(-(tileX+tileW)/2);
-        buildingGroup.translateY((tileY+tileH)/2);
+        buildingGroup.translateY(-tileY-tileH/2 );
 
         scene.add( buildingGroup );
         addGeoObject(obj);
@@ -388,13 +404,7 @@ var TileExporter = (function() {
             bevelEnabled: false
           });
 
-          for(k = 0; k< shape3d.vertices.length; k++) {
-             var v = shape3d.vertices[k];
-             v.setY(-v.y);
-          }
-
           var mesh = new THREE.Mesh(shape3d, material);
-          reverseWindingOrder(mesh);
           buildingGroup.add(mesh);
         } catch(e) {
           console.log('it could not exturde geometry, it can be because of duplicated point of svg.');
