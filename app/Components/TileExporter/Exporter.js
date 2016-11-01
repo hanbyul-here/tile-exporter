@@ -37,7 +37,7 @@ var TileExporter = (function() {
     h = window.innerHeight;
     /// Global : renderer
     renderer = new THREE.WebGLRenderer( { antialias: true } );
-    renderer.setClearColor( 0xb0b0b0 );
+    // renderer.setColor( 0x000000 );
     renderer.setSize( w, h );
 
     /// Global : scene
@@ -278,7 +278,7 @@ var TileExporter = (function() {
 
     var previewProjection = d3.geo.mercator()
       .center([centerLon, centerLat])
-      //this are carved based on zoom 16
+      //This parameter works best with zoom 16
       .scale(600000* 100/58 * Math.pow(2,(config.zoomLevel-16)))
       .precision(.0)
       .translate([0,0])
@@ -298,7 +298,7 @@ var TileExporter = (function() {
 
     // Mercator Geo Projection then flipped in Y
     // Solution taken from http://stackoverflow.com/a/31647135/3049530
-    var projection_then_flipY = {
+    var projectionThenFlipY = {
         stream: function(s) {
             return projection.stream(flipY.stream(s));
         }
@@ -317,7 +317,7 @@ var TileExporter = (function() {
 
             var geoFeature = json[obj].features[j];
             var previewPath = d3.geo.path().projection(previewProjection);
-            var path = d3.geo.path().projection(projection_then_flipY);
+            var path = d3.geo.path().projection(projectionThenFlipY);
 
             var defaultHeight = 13;
 
@@ -334,7 +334,7 @@ var TileExporter = (function() {
               defaultHeight = 15;
             } else if(obj === 'buildings') {
               defaultHeight = 25;
-            } 
+            }
 
             //path = d3.geo.path().projection(projection);
             var feature = path(geoFeature);
