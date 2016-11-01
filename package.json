@@ -25,6 +25,7 @@
     "react": "^0.14.0",
     "react-dom": "0.14.0",
     "react-inline-css": "2.0.0",
+    "react-redux": "^4.4.5",
     "redux": "3.0.1",
     "redux-form": "^2.2.6",
     "redux-logger": "^2.0.2",
