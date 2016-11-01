@@ -6,6 +6,7 @@ import OBJExporter from './OBJ-Exporter';
 
 import OrbitControls from './OrbitControl';
 import PreviewMap from './PreviewMap'
+import {long2tile, lat2tile, tile2Lon, tile2Lat} from './MapSpells';
 
 import Key from '../../Keys'
 
@@ -258,9 +259,8 @@ var TileExporter = (function() {
     return callURL;
   }
 
-  var tileX, tileY, tileW, tileH;
-
   function fetchTheTile(callURL) {
+    var tileX, tileY, tileW, tileH;
 
     setLoadingBar(true);
 
@@ -275,13 +275,6 @@ var TileExporter = (function() {
     //get lon/lat for mercator tile num
     var centerLon = tile2Lon(tileLon, config.zoomLevel);
     var centerLat = tile2Lat(tileLat, config.zoomLevel);
-
-    var previewProjection = d3.geo.mercator()
-      .center([centerLon, centerLat])
-      //This parameter works best with zoom 16
-      .scale(600000* 100/58 * Math.pow(2,(config.zoomLevel-16)))
-      .precision(.0)
-      .translate([0,0])
 
     var projection = d3.geo.mercator()
       .center([centerLon, centerLat])
@@ -316,7 +309,6 @@ var TileExporter = (function() {
           for(var j = 0; j< json[obj].features.length; j++) {
 
             var geoFeature = json[obj].features[j];
-            var previewPath = d3.geo.path().projection(previewProjection);
             var path = d3.geo.path().projection(projectionThenFlipY);
 
             var defaultHeight = 13;
@@ -338,11 +330,8 @@ var TileExporter = (function() {
 
             //path = d3.geo.path().projection(projection);
             var feature = path(geoFeature);
-            var previewFeature = previewPath(geoFeature);
 
             if(feature !== undefined) {
-              if(previewFeature.indexOf('a') > 0) ;
-
               // 'a' command is not implemented in d3-three, skipping for now.
               // 'a' is SVG path command for Ellpitic Arc Curve. https://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands
               if(feature.indexOf('a') > 0) ;
@@ -405,7 +394,7 @@ var TileExporter = (function() {
           var mesh = new THREE.Mesh(shape3d, material);
           buildingGroup.add(mesh);
         } catch(e) {
-          console.log('it could not exturde geometry, it can be because of duplicated point of svg.');
+          console.log(e.message);
         }
 
       }
@@ -499,24 +488,5 @@ var TileExporter = (function() {
     attachEvents: attachEvents
   }
 })();
-
-////here all maps spells are!
-//convert lat/lon to mercator style number
-function long2tile(lon,zoom) {
-  return (Math.floor((lon+180)/360*Math.pow(2,zoom)));
-}
-function lat2tile(lat,zoom)  {
-  return (Math.floor((1-Math.log(Math.tan(lat*Math.PI/180) + 1/Math.cos(lat*Math.PI/180))/Math.PI)/2 *Math.pow(2,zoom)));
-}
-
-//shold check it will work
-function tile2Lon(tileLon, zoom) {
-  return (tileLon*360/Math.pow(2,zoom)-180).toFixed(10);
-}
-
-function tile2Lat(tileLat, zoom) {
-  return ((360/Math.PI) * Math.atan(Math.pow( Math.E, (Math.PI - 2*Math.PI*tileLat/(Math.pow(2,zoom)))))-90).toFixed(10);
-}
-
 
 module.exports = TileExporter;
