@@ -1,6 +1,10 @@
 import d3 from 'd3'
 import THREE from 'three'
 
+import './Triangulation'
+// Changes the way Threejs does triangulation
+THREE.Triangulation.setLibrary('earcut');
+
 import D3d from './D3-Three'
 import OBJExporter from './OBJ-Exporter';
 
