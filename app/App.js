@@ -1,12 +1,11 @@
-import React, { Component } from 'react'
-import {render} from 'react-dom'
+import React, { Component } from 'react';
+import {render} from 'react-dom';
 
-import Keys from './Keys'
-import CancelButton from './Components/Search/CancelButton'
+import Keys from './Keys';
 
-import SearchBox from './Components/Search/SearchBox'
+import SearchBox from './Components/Search/SearchBox';
 
-import TileExporter from './Components/TileExporter/Exporter'
+import TileExporter from './Components/TileExporter/Exporter';
 
 require('./scss/main.scss')
 

@@ -1,14 +1,14 @@
 import d3 from 'd3'
 import THREE from 'three'
 
-import './Triangulation'
+import '../../libs/Triangulation'
 // Changes the way Threejs does triangulation
 THREE.Triangulation.setLibrary('earcut');
 
-import D3d from './D3-Three'
-import OBJExporter from './OBJ-Exporter';
+import D3d from '../../libs/D3-Three'
+import OBJExporter from '../../libs/OBJ-Exporter';
 
-import OrbitControls from './OrbitControl';
+import OrbitControls from '../../libs/OrbitControl';
 import PreviewMap from './PreviewMap'
 import {long2tile, lat2tile, tile2Lon, tile2Lat} from './MapSpells';
 

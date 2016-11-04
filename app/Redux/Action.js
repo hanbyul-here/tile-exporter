@@ -3,14 +3,14 @@ export function updatePoint(latLon) {
     type: 'updateLatLon',
     lat: parseFloat(latLon.lat),
     lon: parseFloat(latLon.lon)
-  }
+  };
 }
 
 export function updateZoom(zoomLevel) {
   return {
     type: 'updateZoom',
-    zoom: parseInt(zoomLevel)
-  }
+    zoom: parseInt(zoomLevel, 10)
+  };
 }
 
 export function updatePointZoom(latLonZoom) {
@@ -18,7 +18,7 @@ export function updatePointZoom(latLonZoom) {
     type: 'updatePointZoom',
     lat: parseFloat(latLonZoom.lat),
     lon: parseFloat(latLonZoom.lon),
-    zoom: parseInt(latLonZoom.zoom)
-  }
+    zoom: parseInt(latLonZoom.zoom, 10)
+  };
 }
 
