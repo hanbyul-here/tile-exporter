@@ -4,6 +4,7 @@
   "description": "get you favorite tile in obj form",
   "main": "index.js",
   "scripts": {
+    "lint": "./node_modules/.bin/eslint app/*; return 0;",
     "dev": "node -r babel-core/register server.js",
     "build": "webpack -p"
   },
