@@ -58,7 +58,7 @@ div[id^="preview"] {
   &:hover:before { content: 'NW';}
 }
 
-#preview-east {
+#preview-center-east {
   top:100px;
   left: 200px;
   &:hover:before { content: 'E';}
@@ -68,7 +68,7 @@ div[id^="preview"] {
   stroke: #000;
   z-index: 5;
 }
-#preview-west {
+#preview-center-west {
   top:100px;
   left: 0px;
   &:hover:before { content: 'W'}

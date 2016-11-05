@@ -1,4 +1,4 @@
-export function updatePoint(latLon) {
+function updatePoint(latLon) {
   return {
     type: 'updateLatLon',
     lat: parseFloat(latLon.lat),
@@ -6,14 +6,22 @@ export function updatePoint(latLon) {
   };
 }
 
-export function updateZoom(zoomLevel) {
+function updateZoom(zoomLevel) {
   return {
     type: 'updateZoom',
     zoom: parseInt(zoomLevel, 10)
   };
 }
 
-export function updatePointZoom(latLonZoom) {
+function updateTileNum(tileLatLon) {
+  return {
+    type: 'updateZoom',
+    tileLat: parseInt(tileLatLon.lat, 10),
+    tileLon: parseInt(tileLatLon.lon, 10)
+  };
+}
+
+function updatePointZoom(latLonZoom) {
   return {
     type: 'updatePointZoom',
     lat: parseFloat(latLonZoom.lat),
@@ -22,3 +30,4 @@ export function updatePointZoom(latLonZoom) {
   };
 }
 
+module.exports = { updatePoint, updateTileNum, updateZoom, updatePointZoom };

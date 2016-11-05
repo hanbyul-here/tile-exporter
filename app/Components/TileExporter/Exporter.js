@@ -1,105 +1,43 @@
-import d3 from 'd3'
-import THREE from 'three'
+import d3 from 'd3';
+import THREE from 'three';
+import D3d from '../../libs/D3-Three';
+import OBJExporter from '../../libs/OBJ-Exporter';
+import OrbitControls from '../../libs/OrbitControl';
 
-import '../../libs/Triangulation'
+import PreviewMap from './PreviewMap';
+import { tile2Lon, tile2Lat } from './MapSpells';
+
+import Key from '../../Keys';
+
+import store from '../../Redux/Store';
+import { updateZoom, updatePoint, updatePointZoom } from '../../Redux/Action';
+import BasicScene from './BasicScene';
+
+import '../../libs/Triangulation';
 // Changes the way Threejs does triangulation
 THREE.Triangulation.setLibrary('earcut');
 
-import D3d from '../../libs/D3-Three'
-import OBJExporter from '../../libs/OBJ-Exporter';
+var TileExporter = (function () {
+  var basicScene;
+  // var renderer;
+  var buildingGroup, exporter;
 
-import OrbitControls from '../../libs/OrbitControl';
-import PreviewMap from './PreviewMap'
-import {long2tile, lat2tile, tile2Lon, tile2Lat} from './MapSpells';
-
-import Key from '../../Keys'
-
-import store from '../../Redux/Store'
-import {updateZoom, updatePoint, updatePointZoom} from '../../Redux/Action'
-import reducer from '../../Redux/Reducer'
-
-var TileExporter = (function() {
-
-  var renderer;
-  var scene, camera, controls, buildingGroup, exporter;
-
-  var tileLon, tileLat;
-
-  var w,h;
-
-  var dthreed = new D3d();
+  const dthreed = new D3d();
   var exporter = new OBJExporter();
 
-  var config = {
+  const config = {
     baseURL: "https://tile.mapzen.com/mapzen/vector/v1",
     dataKind: "all",
-    fileFormat: "json",
-    zoomLevel: 16
+    fileFormat: "json"
   }
-
   function initScene() {
-    w = window.innerWidth;
-    h = window.innerHeight;
-    /// Global : renderer
-    renderer = new THREE.WebGLRenderer( { antialias: true } );
-    // renderer.setColor( 0x000000 );
-    renderer.setSize( w, h );
-
-    /// Global : scene
-    scene = new THREE.Scene();
-
-    /// Global : camera
-    camera = new THREE.PerspectiveCamera( 20, w/ h, 1, 1000000 );
-    camera.position.set(0, 0, 500 );
-    camera.lookAt(new THREE.Vector3(0,0,0))
-
-
-    /// direct light
-    var light = new THREE.DirectionalLight( 0xffffff );
-    light.position.set( 1, 1, 1 );
-    light.rotation.set( 2, 1, 1 );
-    scene.add( light );
-
-    /// ambient light
-     var ambientLight = new THREE.AmbientLight(0xffffff);
-     scene.add( ambientLight );
-
-    //orbit control
-    controls = new OrbitControls( camera, renderer.domElement );
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.25;
-    controls.enableZoom = false;
-
-    //attach renderer to DOM
-    document.body.appendChild( renderer.domElement );
-    //initiating animate of rendere at the same time
-    animate();
+    basicScene = new BasicScene();
   }
-
-
-  function animate() {
-    requestAnimationFrame( animate );
-    controls.update();
-    renderer.render( scene, camera );
-  }
-
-
-  function onWindowResize() {
-
-    w = window.innerWidth;
-    h = window.innerHeight;
-    camera.aspect = w / h;
-    camera.updateProjectionMatrix();
-    renderer.setSize( w, h );
-  }
-
 
   function attachEvents() {
     var exportBtn = document.getElementById('exportBtn');
 
     exportBtn.addEventListener( 'click', function() {
-      //var inputLon = document.getElementById('lon').value;
-      //var inputLat = document.getElementById('lat').value;
       fetchTheTile(buildQueryURL());
     });
 
@@ -107,41 +45,40 @@ var TileExporter = (function() {
      var nBtn = document.getElementById('preview-north');
      var neBtn = document.getElementById('preview-north-east');
 
-     var wBtn = document.getElementById('preview-west');
+     var wBtn = document.getElementById('preview-center-west');
 
-     var eBtn = document.getElementById('preview-east');
+     var eBtn = document.getElementById('preview-center-east');
 
      var swBtn = document.getElementById('preview-south-west');
      var sBtn = document.getElementById('preview-south');
      var seBtn = document.getElementById('preview-south-east');
 
-
     //navigating tile
     nwBtn.addEventListener('click', function() {
-      navigateTile(-1,-1)
+      navigateTile(-1, -1)
     });
     nBtn.addEventListener('click', function() {
-      navigateTile(0,-1)
+      navigateTile(0, -1)
     });
     neBtn.addEventListener('click', function() {
-      navigateTile(1,-1)
+      navigateTile(1, -1)
     });
 
     wBtn.addEventListener('click', function() {
-      navigateTile(-1,0)
+      navigateTile(-1, 0)
     });
     eBtn.addEventListener('click', function() {
-      navigateTile(1,0)
+      navigateTile(1, 0)
     });
 
     swBtn.addEventListener('click', function() {
-      navigateTile(-1,1)
+      navigateTile(-1, 1)
     });
     sBtn.addEventListener('click', function() {
-      navigateTile(0,1)
+      navigateTile(0, 1)
     });
     seBtn.addEventListener('click', function() {
-      navigateTile(1,1)
+      navigateTile(1, 1)
     });
 
     var zoomRad = document.zoomRadio.zoomLevel;
@@ -152,8 +89,8 @@ var TileExporter = (function() {
           if(this !== prev) {
             prev = this;
           }
-         var zoomLevel = parseInt(prev.value);
-         store.dispatch(updateZoom(zoomLevel))
+          var zoomLevel = parseInt(prev.value);
+         store.dispatch(updateZoom(zoomLevel));
         }
       }
 
@@ -170,83 +107,36 @@ var TileExporter = (function() {
       }
     });
 
-
-    window.addEventListener( 'resize', onWindowResize, false );
-
+    window.addEventListener( 'resize', basicScene.onWindowResize, false );
     //check query string
     checkQueries();
   }
 
+  function navigateTile(tilePos) {
+    var tLon = store.getState().tileLon + tilePos.ew;
+    var tLat = store.getState().tileLat + tilePos.ns;
 
-  function checkQueries() {
-    var _lon = getParameterByName('lon');
-    var _lat = getParameterByName('lat');
-    var _zoom = getParameterByName('zoom');
-
-
-    if(_lon !== null && _lat !== null && _zoom !== null) {
-
-      _zoom = _zoom.replace(/[^0-9]+/g, '');
-
-      document.getElementById('lat').innerHTML = _lat;
-      document.getElementById('lon').innerHTML = _lon;
-
-      document.zoomRadio.zoomLevel.value = _zoom;
-      config.zoomLevel = _zoom;
-
-      store.dispatch(updatePointZoom({
-        lat: _lat,
-        lon: _lon,
-        zoom: _zoom
-      }))
-      fetchTheTile(buildQueryURL());
-      document.getElementById('exportBtn').disabled  = false;
+    var _zoom = store.getState().zoom;
+    var newLatLonZoom = {
+      lon: tile2Lon(tLon, _zoom),
+      lat: tile2Lat(tLat, _zoom),
+      zoom: _zoom
     }
-  }
 
+    store.dispatch(updatePoint(newLatLonZoom));
+    fetchTheTile(buildQueryURL());
+    updateQueryString(newLatLonZoom);
 
-
-  function navigateTile(eastWest, northSouth) {
-
-    if(tileLon) {
-      tileLon += eastWest;
-      tileLat += northSouth;
-
-      var zoom = store.getState().zoom;
-
-      var callURL =  config.baseURL + '/' + config.dataKind + '/' + zoom + '/' + tileLon + '/' + tileLat + '.' + config.fileFormat + '?api_key=' + Key.vectorTile;
-      var centerLon = tile2Lon(tileLon, zoom);
-      var centerLat = tile2Lat(tileLat, zoom);
-
-      var lonLatZoom = {
-        lon: centerLon,
-        lat: centerLat,
-        zoom: zoom
-      }
-
-      store.dispatch(updatePoint({
-        lon: centerLon,
-        lat: centerLat
-      }))
-
-      //store.dispatch(updatePointZoom(lonLatZoom))
-      fetchTheTile(callURL);
-
-      updateQueryString(lonLatZoom)
-
-      document.getElementById('lat').innerHTML = centerLat;
-      document.getElementById('lon').innerHTML = centerLon;
-    } else {
-      console.log('please select a place')
-    }
+    document.getElementById('lat').innerHTML = newLatLonZoom.lat;
+    document.getElementById('lon').innerHTML = newLatLonZoom.lon;
   }
 
   function buildQueryURL() {
-
-    var inputLon = store.getState().lon; //parseFloat(lon);//-74.0059700;
-    var inputLat = store.getState().lat;//parseFloat(lat);//40.7142700;
+    var inputLon = store.getState().lon;
+    var inputLat = store.getState().lat;
+    var tLon = store.getState().tileLon;
+    var tLat = store.getState().tileLat;
     var zoom = store.getState().zoom;
-    config.zoomLevel = zoom;
 
     updateQueryString({
       'lon': inputLon,
@@ -254,12 +144,8 @@ var TileExporter = (function() {
       'zoom': zoom
     });
 
-
-    //falttening geocode by converting them to mercator tile nums
-    tileLon = long2tile(inputLon, zoom);
-    tileLat = lat2tile(inputLat , zoom);
-
-    var callURL =  config.baseURL + '/' + config.dataKind + '/' + zoom + '/' + tileLon + '/' + tileLat + '.' + config.fileFormat + '?api_key=' + Key.vectorTile;
+    var callURL =  config.baseURL + '/' + config.dataKind + '/' + zoom + '/' + tLon + '/' + tLat + '.' + config.fileFormat + '?api_key=' + Key.vectorTile;
+    console.log(callURL);
     return callURL;
   }
 
@@ -272,18 +158,14 @@ var TileExporter = (function() {
     var heights = [];
 
     //get rid of current Tile from scene if there is any
-    scene.remove(buildingGroup);
+    basicScene.removeObject(buildingGroup);
     //get rid of current preview
     PreviewMap.destroy();
 
-    //get lon/lat for mercator tile num
-    var centerLon = tile2Lon(tileLon, config.zoomLevel);
-    var centerLat = tile2Lat(tileLat, config.zoomLevel);
-
     var projection = d3.geo.mercator()
-      .center([centerLon, centerLat])
+      .center([store.getState().lon, store.getState().lat])
       .scale(1000000)
-      .precision(.0)
+      .precision(0.0)
       .translate([0,0])
 
     // Will flip the Y coordinates that result from the geo projection
@@ -302,8 +184,7 @@ var TileExporter = (function() {
      };
 
     //draw previewmap
-    PreviewMap.drawData(tileLon, tileLat);
-
+    PreviewMap.drawData();
     // converting d3 path(svg) to three shape
     //converting geocode to mercator tile nums
     d3.json(callURL, function(err,json) {
@@ -358,7 +239,7 @@ var TileExporter = (function() {
         buildingGroup.translateX(-(tileX+tileW)/2);
         buildingGroup.translateY(-tileY-tileH/2 );
 
-        scene.add( buildingGroup );
+        basicScene.addObject(buildingGroup);
         addGeoObject(obj);
       }
       setLoadingBar(false);
@@ -448,7 +329,7 @@ var TileExporter = (function() {
     var buildingObj = exportToObj()
     var exportA = document.getElementById('exportA');
     exportA.className = "";
-    exportA.download = 'tile'+tileLon +'-'+tileLat+'-'+store.getState().zoom+'.obj';
+    exportA.download = 'tile'+store.getState().tileLon +'-'+store.getState().tileLat+'-'+store.getState().zoom+'.obj';
 
     var blob = new Blob([buildingObj], {type: 'text'});
     var url = URL.createObjectURL(blob);
@@ -456,10 +337,34 @@ var TileExporter = (function() {
   }
 
   function exportToObj () {
-    var result = exporter.parse(scene);
+    var result = exporter.parse(basicScene.getScene);
     return result;
   }
 
+
+  function checkQueries() {
+    var _lon = getParameterByName('lon');
+    var _lat = getParameterByName('lat');
+    var _zoom = getParameterByName('zoom');
+
+    if(_lon !== null && _lat !== null && _zoom !== null) {
+
+      _zoom = _zoom.replace(/[^0-9]+/g, '');
+
+      document.getElementById('lat').innerHTML = _lat;
+      document.getElementById('lon').innerHTML = _lon;
+
+      document.zoomRadio.zoomLevel.value = _zoom;
+
+      store.dispatch(updatePointZoom({
+        lat: _lat,
+        lon: _lon,
+        zoom: _zoom
+      }))
+      fetchTheTile(buildQueryURL());
+      document.getElementById('exportBtn').disabled  = false;
+    }
+  }
 
   function updateQueryString(paramObj) {
     var url = window.location.origin + window.location.pathname;
@@ -483,7 +388,7 @@ var TileExporter = (function() {
   }
 
   function setLoadingBar(on) {
-    if(on) document.getElementById('loading-bar').style.display = 'block';
+    if (on) document.getElementById('loading-bar').style.display = 'block';
     else document.getElementById('loading-bar').style.display = 'none';
   }
 
