@@ -113,25 +113,6 @@ a.disabled {
   }
 }
 
-//// for rainbow material
-.rainbow {
-  width: 20px;
-  height: 20px;
-  display: block;
-  float: right;
-  background-size: contain;
-  background-image: url('./resources/rainbow.png');
-}
-
-.rainbow:hover:after {
-  content: 'The Tile Exporter is rainbow-colored in celebration of Pride Month. . The obj for download does not have any color.';
-  position: absolute;
-  width: 200px;
-  padding: 10px;
-  font-size: 10px;
-  background-color: #eee;
-}
-
 //loading spinner animation
 @keyframes spinning {
   0% { transform: rotate(0deg); }
