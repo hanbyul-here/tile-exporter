@@ -1,10 +1,9 @@
-import d3 from 'd3';
-import store from '../../Redux/Store';
-import Key from '../../Keys';
+import * as d3 from 'd3';
+import * as store from '../../Redux/Store';
+import * as Key from '../../Keys';
 import { tile2Lon, tile2Lat } from './MapSpells';
-import Exporter from './Exporter';
 
-class BasicScene {
+class PreviewUnit {
 
   constructor(domID) {
     const width = 100;
@@ -17,7 +16,7 @@ class BasicScene {
     this.tilePos = this.getTilePos(domID);
   }
 
-  get config () {
+  get config() {
     return {
       baseURL: 'https://tile.mapzen.com/mapzen/vector/v1',
       dataKind: 'all',
@@ -27,22 +26,22 @@ class BasicScene {
 
   getTilePos(domID) {
     // Figure out tile number based on Preview element's ID
-    let tilePos = {
+    const tilePosObj = {
       ns: 0,
       ew: 0
     };
 
     const tilepos = domID.split('-');
 
-    if (tilePos[1] === 'south') tilePos.ns = 1;
-    if (tilePos[1] === 'north') tilePos.ns = -1;
+    if (tilepos[1] === 'south') tilePosObj.ns = 1;
+    if (tilepos[1] === 'north') tilePosObj.ns = -1;
 
-    if (tilePos.length > 2) {
-      if (tilePos[2] === 'east') tilePos.ew = 1;
-      if (tilePos[2] === 'west') tilePos.ew = -1;
+    if (tilepos.length > 2) {
+      if (tilepos[2] === 'east') tilePosObj.ew = 1;
+      if (tilepos[2] === 'west') tilePosObj.ew = -1;
     }
 
-    return tilePos
+    return tilePosObj;
   }
 
   drawTheTile(url) {
@@ -56,7 +55,7 @@ class BasicScene {
 
     const svg = this.svg;
 
-    d3.json(url.callURL, function (err, json) {
+    d3.json(url.callURL, function(err, json) {
       for (let obj in json) { // eslint-disable-line
         if (err) console.log(`Error : +${err}`);
         else {
@@ -100,7 +99,6 @@ class BasicScene {
   destroy() {
     this.svg.selectAll('*').remove();
   }
-
 }
 
-module.exports = BasicScene;
+export default PreviewUnit;

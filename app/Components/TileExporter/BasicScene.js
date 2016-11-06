@@ -69,4 +69,4 @@ class BasicScene {
   }
 }
 
-module.exports = BasicScene;
+export default BasicScene;

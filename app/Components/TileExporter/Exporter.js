@@ -19,7 +19,7 @@ THREE.Triangulation.setLibrary('earcut');
 
 var TileExporter = (function () {
   var basicScene;
-  // var renderer;
+  var previewMap;;
   var buildingGroup, exporter;
 
   const dthreed = new D3d();
@@ -32,6 +32,7 @@ var TileExporter = (function () {
   }
   function initScene() {
     basicScene = new BasicScene();
+    previewMap = new PreviewMap();
   }
 
   function attachEvents() {
@@ -112,9 +113,9 @@ var TileExporter = (function () {
     checkQueries();
   }
 
-  function navigateTile(tilePos) {
-    var tLon = store.getState().tileLon + tilePos.ew;
-    var tLat = store.getState().tileLat + tilePos.ns;
+  function navigateTile(ew, ns) {
+    var tLon = store.getState().tileLon + ew;
+    var tLat = store.getState().tileLat + ns;
 
     var _zoom = store.getState().zoom;
     var newLatLonZoom = {
@@ -160,7 +161,7 @@ var TileExporter = (function () {
     //get rid of current Tile from scene if there is any
     basicScene.removeObject(buildingGroup);
     //get rid of current preview
-    PreviewMap.destroy();
+    previewMap.destroy();
 
     var projection = d3.geo.mercator()
       .center([store.getState().lon, store.getState().lat])
@@ -184,7 +185,7 @@ var TileExporter = (function () {
      };
 
     //draw previewmap
-    PreviewMap.drawData();
+    previewMap.drawData();
     // converting d3 path(svg) to three shape
     //converting geocode to mercator tile nums
     d3.json(callURL, function(err,json) {
