@@ -64,8 +64,9 @@ class BasicScene {
     this.scene.add(obj);
   }
 
-  removeObject(obj) {
-    this.scene.remove(obj);
+  removeObject(objName) {
+    const selectedObj = this.scene.getObjectByName(objName);
+    if (selectedObj) this.scene.remove(selectedObj);
   }
 }
 

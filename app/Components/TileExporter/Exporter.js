@@ -5,7 +5,9 @@ import OBJExporter from '../../libs/OBJ-Exporter';
 import OrbitControls from '../../libs/OrbitControl';
 
 import PreviewMap from './PreviewMap';
+import QueryChecker from './QueryChecker';
 import { tile2Lon, tile2Lat } from './MapSpells';
+// import QueryChecker from './QueryChecker';
 
 import Key from '../../Keys';
 
@@ -17,71 +19,23 @@ import '../../libs/Triangulation';
 // Changes the way Threejs does triangulation
 THREE.Triangulation.setLibrary('earcut');
 
-var TileExporter = (function () {
-  var basicScene;
-  var previewMap;;
-  var buildingGroup, exporter;
+class TileExporter {
+  constructor () {
+    this.basicScene = new BasicScene();
+    this.previewMap = new PreviewMap(this);
+    this.exporter = new OBJExporter();
+    this.dthreed = new D3d();
+    this.queryChecker = new QueryChecker(this);
+    this.attachEvents();
 
-  const dthreed = new D3d();
-  var exporter = new OBJExporter();
-
-  const config = {
-    baseURL: "https://tile.mapzen.com/mapzen/vector/v1",
-    dataKind: "all",
-    fileFormat: "json"
-  }
-  function initScene() {
-    basicScene = new BasicScene();
-    previewMap = new PreviewMap();
   }
 
-  function attachEvents() {
+  attachEvents() {
     var exportBtn = document.getElementById('exportBtn');
 
-    exportBtn.addEventListener( 'click', function() {
-      fetchTheTile(buildQueryURL());
+    exportBtn.addEventListener( 'click', () => {
+      this.fetchTheTile(this.buildQueryURL());
     });
-
-     var nwBtn = document.getElementById('preview-north-west');
-     var nBtn = document.getElementById('preview-north');
-     var neBtn = document.getElementById('preview-north-east');
-
-     var wBtn = document.getElementById('preview-center-west');
-
-     var eBtn = document.getElementById('preview-center-east');
-
-     var swBtn = document.getElementById('preview-south-west');
-     var sBtn = document.getElementById('preview-south');
-     var seBtn = document.getElementById('preview-south-east');
-
-    //navigating tile
-    nwBtn.addEventListener('click', function() {
-      navigateTile(-1, -1)
-    });
-    nBtn.addEventListener('click', function() {
-      navigateTile(0, -1)
-    });
-    neBtn.addEventListener('click', function() {
-      navigateTile(1, -1)
-    });
-
-    wBtn.addEventListener('click', function() {
-      navigateTile(-1, 0)
-    });
-    eBtn.addEventListener('click', function() {
-      navigateTile(1, 0)
-    });
-
-    swBtn.addEventListener('click', function() {
-      navigateTile(-1, 1)
-    });
-    sBtn.addEventListener('click', function() {
-      navigateTile(0, 1)
-    });
-    seBtn.addEventListener('click', function() {
-      navigateTile(1, 1)
-    });
-
     var zoomRad = document.zoomRadio.zoomLevel;
     var prev = null;
 
@@ -108,14 +62,14 @@ var TileExporter = (function () {
       }
     });
 
-    window.addEventListener( 'resize', basicScene.onWindowResize, false );
+    window.addEventListener( 'resize', this.basicScene.onWindowResize, false );
     //check query string
-    checkQueries();
+    // checkQueries();
   }
 
-  function navigateTile(ew, ns) {
-    var tLon = store.getState().tileLon + ew;
-    var tLat = store.getState().tileLat + ns;
+  navigateTile(tilePos) {
+    var tLon = store.getState().tileLon + tilePos.ew;
+    var tLat = store.getState().tileLat + tilePos.ns;
 
     var _zoom = store.getState().zoom;
     var newLatLonZoom = {
@@ -125,44 +79,65 @@ var TileExporter = (function () {
     }
 
     store.dispatch(updatePoint(newLatLonZoom));
-    fetchTheTile(buildQueryURL());
-    updateQueryString(newLatLonZoom);
+    this.fetchTheTile(this.buildQueryURL());
+    this.queryChecker.updateQueryString(newLatLonZoom);
 
-    document.getElementById('lat').innerHTML = newLatLonZoom.lat;
-    document.getElementById('lon').innerHTML = newLatLonZoom.lon;
+    this.displayCoord();
   }
 
-  function buildQueryURL() {
+  buildQueryURL() {
     var inputLon = store.getState().lon;
     var inputLat = store.getState().lat;
     var tLon = store.getState().tileLon;
     var tLat = store.getState().tileLat;
     var zoom = store.getState().zoom;
 
-    updateQueryString({
-      'lon': inputLon,
-      'lat': inputLat,
-      'zoom': zoom
-    });
+    var config = {
+      baseURL: 'https://tile.mapzen.com/mapzen/vector/v1',
+      dataKind: 'all',
+      fileFormat: 'json'
+    };
 
     var callURL =  config.baseURL + '/' + config.dataKind + '/' + zoom + '/' + tLon + '/' + tLat + '.' + config.fileFormat + '?api_key=' + Key.vectorTile;
     console.log(callURL);
     return callURL;
   }
 
-  function fetchTheTile(callURL) {
-    var tileX, tileY, tileW, tileH;
-
-    setLoadingBar(true);
-
-    var buildings = [];
-    var heights = [];
+ fetchTheTile(callURL) {
+    this.setLoadingBar(true);
 
     //get rid of current Tile from scene if there is any
-    basicScene.removeObject(buildingGroup);
-    //get rid of current preview
-    previewMap.destroy();
+    this.basicScene.removeObject('geoObjectsGroup');
 
+    //get rid of current preview
+    this.previewMap.destroy();
+
+    //draw previewmap
+    this.previewMap.drawData();
+    // converting d3 path(svg) to three shape
+    //converting geocode to mercator tile nums
+
+    var self = this;
+    d3.json(callURL, function(err,json) {
+      if(err) console.log('err!');
+      else {
+        var geoGroups = self.bakeTile(json);
+        self.basicScene.addObject(geoGroups);
+
+      }
+      self.setLoadingBar(false);
+    })
+    this.queryChecker.updateQueryString({
+      'lon': store.getState().lon,
+      'lat': store.getState().lat,
+      'zoom': store.getState().zoom
+    });
+  }
+
+  bakeTile(json) {
+    var convertedThreePaths = [];
+    var heights = [];
+    var tileX, tileY, tileW, tileH;
     var projection = d3.geo.mercator()
       .center([store.getState().lon, store.getState().lat])
       .scale(1000000)
@@ -184,13 +159,6 @@ var TileExporter = (function () {
         }
      };
 
-    //draw previewmap
-    previewMap.drawData();
-    // converting d3 path(svg) to three shape
-    //converting geocode to mercator tile nums
-    d3.json(callURL, function(err,json) {
-      if(err) console.log('err!');
-      else {
         for(var obj in json) {
           for(var j = 0; j< json[obj].features.length; j++) {
 
@@ -213,7 +181,6 @@ var TileExporter = (function () {
             } else if(obj === 'buildings') {
               defaultHeight = 25;
             }
-
             //path = d3.geo.path().projection(projection);
             var feature = path(geoFeature);
 
@@ -222,8 +189,8 @@ var TileExporter = (function () {
               // 'a' is SVG path command for Ellpitic Arc Curve. https://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands
               if(feature.indexOf('a') > 0) ;
               else {
-                var mesh = dthreed.exportSVG(feature);
-                buildings.push(mesh);
+                var mesh = this.dthreed.exportSVG(feature);
+                convertedThreePaths.push(mesh);
                 var h = (geoFeature.properties['height']+10) || defaultHeight;
                 heights.push(h);
               }
@@ -231,27 +198,26 @@ var TileExporter = (function () {
           }
         }
 
-        var obj = {};
-        obj.paths = buildings;
+        var obj = {
+          paths: convertedThreePaths,
+          amounts: heights
+        }
 
-        obj.amounts = heights || defaultHeight;
-        buildingGroup = new THREE.Group();
-        //buildingGroup.rotation.x = Math.PI;
-        buildingGroup.translateX(-(tileX+tileW)/2);
-        buildingGroup.translateY(-tileY-tileH/2 );
-
-        basicScene.addObject(buildingGroup);
-        addGeoObject(obj);
-      }
-      setLoadingBar(false);
-    });
+        var geoGroup = this.getThreeGroup(obj);
+        geoGroup.translateX(-(tileX+tileW)/2);
+        geoGroup.translateY(-tileY-tileH/2 );
+        return geoGroup;
   }
 
-  function addGeoObject(svgObject) {
+  getThreeGroup(meshObjs) {
+
+    var geoObjectsGroup = new THREE.Group();
+    geoObjectsGroup.name = 'geoObjectsGroup';
+
     var path, material, amount, simpleShapes, simpleShape, shape3d, toAdd, results = [];
 
-    var thePaths = svgObject.paths;
-    var theAmounts = svgObject.amounts;
+    var thePaths = meshObjs.paths;
+    var theAmounts = meshObjs.amounts;
 
     var color = new THREE.Color("#5c5c5c");
 
@@ -278,56 +244,20 @@ var TileExporter = (function () {
           });
 
           var mesh = new THREE.Mesh(shape3d, material);
-          buildingGroup.add(mesh);
+          geoObjectsGroup.add(mesh);
         } catch(e) {
           console.log(e.message);
         }
 
       }
     }
-    enableDownloadLink();
+
+    this.enableDownloadLink();
+    return geoObjectsGroup;
   }
 
-  function reverseWindingOrder(object3D) {
-    // This function is written by Immugio at Stack Overflow
-    // http://stackoverflow.com/questions/28630097/flip-mirror-any-object-with-three-js
-    // it had TODO: Something is missing, the objects are flipped alright but the light reflection on them is somehow broken
-    // this application ignored light reflection using flat shade material
-
-    if (object3D.type === "Mesh") {
-
-      var geometry = object3D.geometry;
-
-      for (var i = 0, l = geometry.faces.length; i < l; i++) {
-          var face = geometry.faces[i];
-          var temp = face.a;
-          face.a = face.c;
-          face.c = temp;
-      }
-
-      var faceVertexUvs = geometry.faceVertexUvs[0];
-
-      for (i = 0, l = faceVertexUvs.length; i < l; i++) {
-
-        var vector2 = faceVertexUvs[i][0];
-        faceVertexUvs[i][0] = faceVertexUvs[i][2];
-        faceVertexUvs[i][2] = vector2;
-      }
-
-      geometry.computeFaceNormals();
-      //geometry.computeVertexNormals();
-    }
-
-    if (object3D.children) {
-      for (var j = 0, jl = object3D.children.length; j < jl; j++) {
-        reverseWindingOrder(object3D.children[j]);
-      }
-    }
-  }
-
-  function enableDownloadLink() {
-
-    var buildingObj = exportToObj()
+  enableDownloadLink(self) {
+    var buildingObj = this.exportToObj();
     var exportA = document.getElementById('exportA');
     exportA.className = "";
     exportA.download = 'tile'+store.getState().tileLon +'-'+store.getState().tileLat+'-'+store.getState().zoom+'.obj';
@@ -337,66 +267,20 @@ var TileExporter = (function () {
     exportA.href = url;
   }
 
-  function exportToObj () {
-    var result = exporter.parse(basicScene.getScene);
+  exportToObj () {
+    var result = this.exporter.parse(this.basicScene.getScene);
     return result;
   }
 
-
-  function checkQueries() {
-    var _lon = getParameterByName('lon');
-    var _lat = getParameterByName('lat');
-    var _zoom = getParameterByName('zoom');
-
-    if(_lon !== null && _lat !== null && _zoom !== null) {
-
-      _zoom = _zoom.replace(/[^0-9]+/g, '');
-
-      document.getElementById('lat').innerHTML = _lat;
-      document.getElementById('lon').innerHTML = _lon;
-
-      document.zoomRadio.zoomLevel.value = _zoom;
-
-      store.dispatch(updatePointZoom({
-        lat: _lat,
-        lon: _lon,
-        zoom: _zoom
-      }))
-      fetchTheTile(buildQueryURL());
-      document.getElementById('exportBtn').disabled  = false;
-    }
-  }
-
-  function updateQueryString(paramObj) {
-    var url = window.location.origin + window.location.pathname;
-    var newUrl = url + '?';
-    var params = [];
-    for(var key in paramObj) {
-      params.push(encodeURIComponent(key) + "=" + encodeURIComponent(paramObj[key]));
-    }
-    newUrl += params.join("&");
-    window.history.replaceState({},'',newUrl);
-  }
-
-  function getParameterByName(name, url) {
-    if (!url) url = window.location.href;
-    name = name.replace(/[\[\]]/g, "\\$&");
-    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-        results = regex.exec(url);
-    if (!results) return null;
-    if (!results[2]) return '';
-    return decodeURIComponent(results[2].replace(/\+/g, " "));
-  }
-
-  function setLoadingBar(on) {
+  setLoadingBar(on) {
     if (on) document.getElementById('loading-bar').style.display = 'block';
     else document.getElementById('loading-bar').style.display = 'none';
   }
 
-  return {
-    initScene: initScene,
-    attachEvents: attachEvents
+  displayCoord() {
+    document.getElementById('lat').innerHTML = store.getState().lat;
+    document.getElementById('lon').innerHTML = store.getState().lon;
   }
-})();
+}
 
-module.exports = TileExporter;
+export default TileExporter;

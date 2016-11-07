@@ -13,8 +13,9 @@ const searchConfig = {
   key: Keys.search
 };
 
-TileExporter.initScene();
-TileExporter.attachEvents();
+const tileExporter = new TileExporter();
+// TileExporter.initScene();
+// TileExporter.attachEvents();
 
 function SearchBoxWrapper() {
   return (

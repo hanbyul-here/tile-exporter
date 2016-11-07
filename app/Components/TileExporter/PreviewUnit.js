@@ -2,10 +2,11 @@ import * as d3 from 'd3';
 import * as store from '../../Redux/Store';
 import * as Key from '../../Keys';
 import { tile2Lon, tile2Lat } from './MapSpells';
+import { navigateTile } from './Exporter';
 
 class PreviewUnit {
 
-  constructor(domID) {
+  constructor(domID, exporter) {
     const width = 100;
     const height = 100;
 
@@ -14,6 +15,11 @@ class PreviewUnit {
             .attr('width', width)
             .attr('height', height);
     this.tilePos = this.getTilePos(domID);
+
+    const btn = document.getElementById(domID);
+    btn.addEventListener('click', () => {
+       exporter.navigateTile(this.tilePos);
+    });
   }
 
   get config() {
