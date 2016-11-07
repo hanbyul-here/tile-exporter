@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import * as store from '../../Redux/Store';
+import store from '../../Redux/Store';
 import * as Key from '../../Keys';
 import { tile2Lon, tile2Lat } from './MapSpells';
 import { navigateTile } from './Exporter';

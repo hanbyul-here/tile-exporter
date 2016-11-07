@@ -2,17 +2,16 @@ import d3 from 'd3';
 import THREE from 'three';
 import D3d from '../../libs/D3-Three';
 import '../../libs/OBJ-Exporter';
-import OrbitControls from '../../libs/OrbitControl';
 
 import PreviewMap from './PreviewMap';
 import QueryChecker from './QueryChecker';
 import { tile2Lon, tile2Lat } from './MapSpells';
-// import QueryChecker from './QueryChecker';
+import DomHelper from './DomHelper';
 
 import Key from '../../Keys';
 
 import store from '../../Redux/Store';
-import { updateZoom, updatePoint, updatePointZoom } from '../../Redux/Action';
+import { updateZoom, updatePoint } from '../../Redux/Action';
 import BasicScene from './BasicScene';
 
 import '../../libs/Triangulation';
@@ -20,44 +19,63 @@ import '../../libs/Triangulation';
 THREE.Triangulation.setLibrary('earcut');
 
 class TileExporter {
-  constructor () {
+  constructor() {
     this.basicScene = new BasicScene();
     this.previewMap = new PreviewMap(this);
-    this.objExporter = new THREE.OBJExporter();
-    this.dthreed = new D3d();
+    this.domHelper = new DomHelper(this);
     this.queryChecker = new QueryChecker(this);
-    this.attachEvents();
 
+    this.dthreed = new D3d();
+    this.objExporter = new THREE.OBJExporter();
+
+    this.domHelper.attachEvents();
+    // this.attachEvents();
   }
 
   attachEvents() {
-    var exportBtn = document.getElementById('exportBtn');
+    this.attachExportBtnEvent();
+    this.attachZoomEvent();
+    this.attachControlPanelEvent();
+    // Resize renderer when window is resized
+    window.addEventListener( 'resize', evt => this.basicScene.onWindowResize());
+  }
 
-    exportBtn.addEventListener( 'click', () => {
+  attachExportBtnEvent() {
+    // Export button event
+    const exportBtn = document.getElementById('exportBtn');
+
+    exportBtn.addEventListener('click', () => {
       this.queryChecker.updateQueryString({
-        'lon': store.getState().lon,
-        'lat': store.getState().lat,
-        'zoom': store.getState().zoom
+        lon: store.getState().lon,
+        lat: store.getState().lat,
+        zoom: store.getState().zoom
       });
       this.fetchTheTile(this.buildQueryURL());
       this.displayCoord();
     });
-    var zoomRad = document.zoomRadio.zoomLevel;
-    var prev = null;
+  }
 
-    for(var i = 0; i < zoomRad.length; i++) {
+  attachZoomEvent() {
+    // Zoom button event
+    const zoomRad = document.zoomRadio.zoomLevel;
+    let prev = null;
+
+    for(let i = 0; i < zoomRad.length; i++) {
       zoomRad[i].onclick = function() {
           if(this !== prev) {
             prev = this;
           }
-          var zoomLevel = parseInt(prev.value);
+          const zoomLevel = parseInt(prev.value);
          store.dispatch(updateZoom(zoomLevel));
         }
       }
+  }
 
-    //for mobile ui, toggle main control
-    var mainControl = document.getElementById('main-control');
-    document.getElementById('hide-toggle').addEventListener('click', function() {
+  attachControlPanelEvent() {
+    // Mobile UI (show hide-control button)
+    const mainControl = document.getElementById('main-control');
+    const toggleButton = document.getElementById('hide-toggle');
+    toggleButton.addEventListener('click', function() {
       if(mainControl.style.display  !== 'none') {
         mainControl.style.display = 'none';
         this.innerHTML = 'Show control';
@@ -67,8 +85,6 @@ class TileExporter {
         this.innerHTML = 'Hide control';
       }
     });
-
-    window.addEventListener( 'resize', evt => this.basicScene.onWindowResize());
   }
 
   navigateTile(tilePos) {
@@ -84,9 +100,9 @@ class TileExporter {
 
     store.dispatch(updatePoint(newLatLonZoom));
     this.fetchTheTile(this.buildQueryURL());
-    this.queryChecker.updateQueryString(newLatLonZoom);
+    // this.queryChecker.updateQueryString(newLatLonZoom);
 
-    this.displayCoord();
+    this.domHelper.displayCoord();
   }
 
   buildQueryURL() {
@@ -108,7 +124,7 @@ class TileExporter {
   }
 
  fetchTheTile(callURL) {
-    this.setLoadingBar(true);
+    this.domHelper.showLoadingBar();
 
     //get rid of current Tile from scene if there is any
     this.basicScene.removeObject('geoObjectsGroup');
@@ -129,7 +145,12 @@ class TileExporter {
         this.basicScene.addObject(geoGroups);
 
       }
-      this.setLoadingBar(false);
+      this.domHelper.hideLoadingBar();
+      this.queryChecker.updateQueryString({
+        lon: store.getState().lon,
+        lat: store.getState().lat,
+        zoom: store.getState().zoom
+      });
       this.enableDownloadLink();
     })
   }
