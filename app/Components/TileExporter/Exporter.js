@@ -1,7 +1,7 @@
 import d3 from 'd3';
 import THREE from 'three';
 import D3d from '../../libs/D3-Three';
-import OBJExporter from '../../libs/OBJ-Exporter';
+import '../../libs/OBJ-Exporter';
 import OrbitControls from '../../libs/OrbitControl';
 
 import PreviewMap from './PreviewMap';
@@ -23,7 +23,7 @@ class TileExporter {
   constructor () {
     this.basicScene = new BasicScene();
     this.previewMap = new PreviewMap(this);
-    this.exporter = new OBJExporter();
+    this.objExporter = new THREE.OBJExporter();
     this.dthreed = new D3d();
     this.queryChecker = new QueryChecker(this);
     this.attachEvents();
@@ -126,12 +126,13 @@ class TileExporter {
 
       }
       self.setLoadingBar(false);
+      self.enableDownloadLink();
     })
-    this.queryChecker.updateQueryString({
-      'lon': store.getState().lon,
-      'lat': store.getState().lat,
-      'zoom': store.getState().zoom
-    });
+    // this.queryChecker.updateQueryString({
+    //   'lon': store.getState().lon,
+    //   'lat': store.getState().lat,
+    //   'zoom': store.getState().zoom
+    // });
   }
 
   bakeTile(json) {
@@ -252,11 +253,10 @@ class TileExporter {
       }
     }
 
-    this.enableDownloadLink();
     return geoObjectsGroup;
   }
 
-  enableDownloadLink(self) {
+  enableDownloadLink() {
     var buildingObj = this.exportToObj();
     var exportA = document.getElementById('exportA');
     exportA.className = "";
@@ -268,7 +268,11 @@ class TileExporter {
   }
 
   exportToObj () {
-    var result = this.exporter.parse(this.basicScene.getScene);
+    // console.log(this.exporter);
+    // console.log(this.basicScene.getScene);
+    // console.log(this.exporter.parse(this.basicScene.getScene));
+    var result = this.objExporter.parse(this.basicScene.getScene);
+    // console.log(result);
     return result;
   }
 

@@ -13,9 +13,8 @@ const searchConfig = {
   key: Keys.search
 };
 
+// Tile Exporter is not written as Reac Component
 const tileExporter = new TileExporter();
-// TileExporter.initScene();
-// TileExporter.attachEvents();
 
 function SearchBoxWrapper() {
   return (
