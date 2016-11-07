@@ -34,7 +34,13 @@ class TileExporter {
     var exportBtn = document.getElementById('exportBtn');
 
     exportBtn.addEventListener( 'click', () => {
+      this.queryChecker.updateQueryString({
+        'lon': store.getState().lon,
+        'lat': store.getState().lat,
+        'zoom': store.getState().zoom
+      });
       this.fetchTheTile(this.buildQueryURL());
+      this.displayCoord();
     });
     var zoomRad = document.zoomRadio.zoomLevel;
     var prev = null;
@@ -62,9 +68,7 @@ class TileExporter {
       }
     });
 
-    window.addEventListener( 'resize', this.basicScene.onWindowResize, false );
-    //check query string
-    // checkQueries();
+    window.addEventListener( 'resize', evt => this.basicScene.onWindowResize());
   }
 
   navigateTile(tilePos) {
@@ -117,22 +121,17 @@ class TileExporter {
     // converting d3 path(svg) to three shape
     //converting geocode to mercator tile nums
 
-    var self = this;
-    d3.json(callURL, function(err,json) {
-      if(err) console.log('err!');
-      else {
-        var geoGroups = self.bakeTile(json);
-        self.basicScene.addObject(geoGroups);
+    d3.json(callURL, (err,json) => {
+      if (err) {
+        console.log(`Error during fetching json from the tile server ${err}`);
+      } else {
+        var geoGroups = this.bakeTile(json);
+        this.basicScene.addObject(geoGroups);
 
       }
-      self.setLoadingBar(false);
-      self.enableDownloadLink();
+      this.setLoadingBar(false);
+      this.enableDownloadLink();
     })
-    // this.queryChecker.updateQueryString({
-    //   'lon': store.getState().lon,
-    //   'lat': store.getState().lat,
-    //   'zoom': store.getState().zoom
-    // });
   }
 
   bakeTile(json) {
@@ -215,7 +214,7 @@ class TileExporter {
     var geoObjectsGroup = new THREE.Group();
     geoObjectsGroup.name = 'geoObjectsGroup';
 
-    var path, material, amount, simpleShapes, simpleShape, shape3d, toAdd, results = [];
+    var amount, simpleShapes, simpleShape, shape3d, toAdd, results = [];
 
     var thePaths = meshObjs.paths;
     var theAmounts = meshObjs.amounts;
@@ -223,7 +222,7 @@ class TileExporter {
     var color = new THREE.Color("#5c5c5c");
 
     // This is normal material for exporter
-    material = new THREE.MeshLambertMaterial({
+    var material = new THREE.MeshLambertMaterial({
       color: color
     });
 
@@ -268,11 +267,7 @@ class TileExporter {
   }
 
   exportToObj () {
-    // console.log(this.exporter);
-    // console.log(this.basicScene.getScene);
-    // console.log(this.exporter.parse(this.basicScene.getScene));
     var result = this.objExporter.parse(this.basicScene.getScene);
-    // console.log(result);
     return result;
   }
 
