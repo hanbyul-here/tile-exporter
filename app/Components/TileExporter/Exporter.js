@@ -29,65 +29,44 @@ class TileExporter {
     this.objExporter = new THREE.OBJExporter();
 
     this.domHelper.attachEvents();
-    // this.attachEvents();
+    window.addEventListener( 'resize', () => {this.basicScene.onWindowResize();});
   }
 
-  attachEvents() {
-    this.attachExportBtnEvent();
-    this.attachZoomEvent();
-    this.attachControlPanelEvent();
-    // Resize renderer when window is resized
-    window.addEventListener( 'resize', evt => this.basicScene.onWindowResize());
-  }
-
-  attachExportBtnEvent() {
-    // Export button event
-    const exportBtn = document.getElementById('exportBtn');
-
-    exportBtn.addEventListener('click', () => {
-      this.queryChecker.updateQueryString({
-        lon: store.getState().lon,
-        lat: store.getState().lat,
-        zoom: store.getState().zoom
-      });
-      this.fetchTheTile(this.buildQueryURL());
-      this.displayCoord();
-    });
-  }
-
-  attachZoomEvent() {
-    // Zoom button event
-    const zoomRad = document.zoomRadio.zoomLevel;
-    let prev = null;
-
-    for(let i = 0; i < zoomRad.length; i++) {
-      zoomRad[i].onclick = function() {
-          if(this !== prev) {
-            prev = this;
-          }
-          const zoomLevel = parseInt(prev.value);
-         store.dispatch(updateZoom(zoomLevel));
-        }
+  get tileConfig() {
+    // These are all features from Mapzen Vector tile all layers
+    return {
+      water: {
+        height: 6
+      },
+      buildings: {
+        height: 25
+      },
+      places: {
+        height: 0
+      },
+      transit: {
+        height: 0
+      },
+      pois: {
+        height: 0
+      },
+      boundaries: {
+        height: 15
+      },
+      roads: {
+        height: 15
+      },
+      earth: {
+        height: 10
+      },
+      landuse: {
+        height: 13
       }
-  }
-
-  attachControlPanelEvent() {
-    // Mobile UI (show hide-control button)
-    const mainControl = document.getElementById('main-control');
-    const toggleButton = document.getElementById('hide-toggle');
-    toggleButton.addEventListener('click', function() {
-      if(mainControl.style.display  !== 'none') {
-        mainControl.style.display = 'none';
-        this.innerHTML = 'Show control';
-      }
-      else {
-        mainControl.style.display = 'block';
-        this.innerHTML = 'Hide control';
-      }
-    });
+    };
   }
 
   navigateTile(tilePos) {
+    // Update store's coordinates to the new tile.
     var tLon = store.getState().tileLon + tilePos.ew;
     var tLat = store.getState().tileLat + tilePos.ns;
 
@@ -100,9 +79,6 @@ class TileExporter {
 
     store.dispatch(updatePoint(newLatLonZoom));
     this.fetchTheTile(this.buildQueryURL());
-    // this.queryChecker.updateQueryString(newLatLonZoom);
-
-    this.domHelper.displayCoord();
   }
 
   buildQueryURL() {
@@ -143,20 +119,21 @@ class TileExporter {
       } else {
         var geoGroups = this.bakeTile(json);
         this.basicScene.addObject(geoGroups);
-
       }
-      this.domHelper.hideLoadingBar();
+      // Update hash value
       this.queryChecker.updateQueryString({
         lon: store.getState().lon,
         lat: store.getState().lat,
         zoom: store.getState().zoom
       });
+
+      this.domHelper.displayCoord();
+      this.domHelper.hideLoadingBar();
       this.enableDownloadLink();
-    })
+    });
   }
 
   bakeTile(json) {
-    var convertedThreePaths = [];
     var heights = [];
     var tileX, tileY, tileW, tileH;
     var projection = d3.geo.mercator()
@@ -180,57 +157,91 @@ class TileExporter {
         }
      };
 
-        for(var obj in json) {
-          for(var j = 0; j< json[obj].features.length; j++) {
+     var geoObj = this.tileConfig;
+     var convertedThreePaths = [];
+      var heights = [];
+      for (var obj in json) {
+        // var defaultHeight = 13;
+        // if(obj === 'earth') {
+          // var b = path.bounds(geoFeature);
+          // tileX = b[0][0];
+          // tileY = b[0][1];
+          // tileW = b[1][0] - b[0][0];
+          // tileH = b[1][1] - b[0][1];
+        //   defaultHeight = 10;
+        // } else if(obj === 'water') {
+        //   defaultHeight = 6;
+        // } else if(obj === 'landuse') {
+        //   defaultHeight = 15;
+        // } else if(obj === 'buildings') {
+        //   defaultHeight = 25;
+        // }
+        var pathWithHeights = [];
+        for (var geoFeature of json[obj].features) {
+          var path = d3.geo.path().projection(projectionThenFlipY);
+          //path = d3.geo.path().projection(projection);
+          var feature = path(geoFeature);
 
-            var geoFeature = json[obj].features[j];
-            var path = d3.geo.path().projection(projectionThenFlipY);
+          if(feature !== undefined) {
+            // 'a' command is not implemented in d3-three, skipping for now.
+            // 'a' is SVG path command for Ellpitic Arc Curve. https://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands
+            if(feature.indexOf('a') > 0) ;
+            else {
+              var mesh = this.dthreed.exportSVG(feature);
+              // convertedThreePaths.push(mesh);
 
-            var defaultHeight = 13;
+              var h = geoFeature.properties['height'] || geoObj[obj].height;
+              // heights.push(h);
 
-            if(obj === 'earth') {
-              var b = path.bounds(geoFeature);
-              tileX = b[0][0];
-              tileY = b[0][1];
-              tileW = b[1][0] - b[0][0];
-              tileH = b[1][1] - b[0][1];
-              defaultHeight = 10;
-            } else if(obj === 'water') {
-              defaultHeight = 6;
-            } else if(obj === 'landuse') {
-              defaultHeight = 15;
-            } else if(obj === 'buildings') {
-              defaultHeight = 25;
-            }
-            //path = d3.geo.path().projection(projection);
-            var feature = path(geoFeature);
+              pathWithHeights.push({
+                threeMesh: mesh,
+                height: h
+              });
 
-            if(feature !== undefined) {
-              // 'a' command is not implemented in d3-three, skipping for now.
-              // 'a' is SVG path command for Ellpitic Arc Curve. https://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands
-              if(feature.indexOf('a') > 0) ;
-              else {
-                var mesh = this.dthreed.exportSVG(feature);
-                convertedThreePaths.push(mesh);
-                var h = (geoFeature.properties['height']+10) || defaultHeight;
-                heights.push(h);
-              }
             }
           }
         }
+        geoObj[obj].paths = pathWithHeights;
+      }
 
-        var obj = {
-          paths: convertedThreePaths,
-          amounts: heights
-        }
+      // var obj = {
+      //   paths: convertedThreePaths,
+      //   amounts: heights
+      // }
 
-        var geoGroup = this.getThreeGroup(obj);
-        geoGroup.translateX(-(tileX+tileW)/2);
-        geoGroup.translateY(-tileY-tileH/2 );
-        return geoGroup;
+      // var geoGroup = this.getThreeGroup(obj);
+      var geoGroup = this.getThreeGroup(testObj);
+      geoGroup.translateX(-100 / ((-15 + store.getState().zoom)*2)); //* 2);
+      geoGroup.translateY(100/ ((-15 + store.getState().zoom)*2)); //* 2);
+      // geoGroup.translateX(-(tileX+tileW));
+      // geoGroup.translateY(-(tileY+tileH));
+      return geoGroup;
   }
 
-  getThreeGroup(meshObjs) {
+  getThreeGroup(geoGroup) {
+    var geoObjectsGroup = new THREE.Group();
+    geoObjectsGroup.name = 'geoObjectsGroup';
+
+    for(var feature in geoGroup) {
+      var color = feature.color || new THREE.Color("#5c5c5c");
+      var material = new THREE.MeshLambertMaterial({
+        color: color
+      });
+      for (var meshPath of geoGroup[feature].paths) {
+        for (var eachMesh of meshPath.threeMesh) {
+          var shape3d = eachMesh.extrude({
+            amount: meshPath.height,
+            bevelEnabled: false
+          })
+          var mesh = new THREE.Mesh(shape3d, material);
+          geoObjectsGroup.add(mesh);
+        }
+      }
+    }
+    return geoObjectsGroup;
+  }
+
+  getOldThreeGroup(meshObjs) {
 
     var geoObjectsGroup = new THREE.Group();
     geoObjectsGroup.name = 'geoObjectsGroup';
@@ -292,15 +303,6 @@ class TileExporter {
     return result;
   }
 
-  setLoadingBar(on) {
-    if (on) document.getElementById('loading-bar').style.display = 'block';
-    else document.getElementById('loading-bar').style.display = 'none';
-  }
-
-  displayCoord() {
-    document.getElementById('lat').innerHTML = store.getState().lat;
-    document.getElementById('lon').innerHTML = store.getState().lon;
-  }
 }
 
 export default TileExporter;

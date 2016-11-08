@@ -21,7 +21,6 @@ class QueryChecker {
         lon: _lon,
         zoom: _zoom
       }))
-      exporter.displayCoord();
       exporter.fetchTheTile(exporter.buildQueryURL());
       document.getElementById('exportBtn').disabled  = false;
     }

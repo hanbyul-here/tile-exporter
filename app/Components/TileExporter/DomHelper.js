@@ -1,4 +1,5 @@
 import store from '../../Redux/Store';
+import { updateZoom } from '../../Redux/Action';
 
 class DomHelper {
   constructor(exporter) {
@@ -20,13 +21,7 @@ class DomHelper {
     const exportBtn = document.getElementById('exportBtn');
 
     exportBtn.addEventListener('click', () => {
-      // this.queryChecker.updateQueryString({
-      //   lon: store.getState().lon,
-      //   lat: store.getState().lat,
-      //   zoom: store.getState().zoom
-      // });
       this.exporter.fetchTheTile(this.exporter.buildQueryURL());
-      this.displayCoord();
     });
   }
   attachZoomBtnEvent() {
@@ -43,7 +38,6 @@ class DomHelper {
         store.dispatch(updateZoom(zoomLevel));
       }
     }
-
   }
   attachControlPanelEvent() {
     // Mobile UI (show hide-control button)
