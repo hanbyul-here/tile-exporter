@@ -9,7 +9,8 @@ import TileExporter from './Components/TileExporter/Exporter';
 require('./scss/main.scss');
 
 // Tile Exporter is not written as React Component
-const tileExporter = new TileExporter();
+const exporter = new TileExporter();
+exporter.attachEvents();
 
 const searchConfig = {
   placeholder: 'Search address or or place',

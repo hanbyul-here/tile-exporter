@@ -11,7 +11,7 @@ import DomHelper from './DomHelper';
 import Key from '../../Keys';
 
 import store from '../../Redux/Store';
-import { updateZoom, updatePoint } from '../../Redux/Action';
+import { updatePoint } from '../../Redux/Action';
 import BasicScene from './BasicScene';
 
 import '../../libs/Triangulation';
@@ -27,9 +27,11 @@ class TileExporter {
 
     this.dthreed = new D3d();
     this.objExporter = new THREE.OBJExporter();
+  }
 
+  attachEvents() {
     this.domHelper.attachEvents();
-    window.addEventListener( 'resize', () => {this.basicScene.onWindowResize();});
+    window.addEventListener('resize', () => { this.basicScene.onWindowResize(); });
   }
 
   get tileConfig() {
@@ -67,61 +69,56 @@ class TileExporter {
 
   navigateTile(tilePos) {
     // Update store's coordinates to the new tile.
-    var tLon = store.getState().tileLon + tilePos.ew;
-    var tLat = store.getState().tileLat + tilePos.ns;
+    const tLon = store.getState().tileLon + tilePos.ew;
+    const tLat = store.getState().tileLat + tilePos.ns;
 
-    var _zoom = store.getState().zoom;
-    var newLatLonZoom = {
+    const _zoom = store.getState().zoom;
+    const newLatLonZoom = {
       lon: tile2Lon(tLon, _zoom),
       lat: tile2Lat(tLat, _zoom),
       zoom: _zoom
-    }
+    };
 
     store.dispatch(updatePoint(newLatLonZoom));
     this.fetchTheTile(this.buildQueryURL());
   }
 
   buildQueryURL() {
-    var inputLon = store.getState().lon;
-    var inputLat = store.getState().lat;
-    var tLon = store.getState().tileLon;
-    var tLat = store.getState().tileLat;
-    var zoom = store.getState().zoom;
+    const tLon = store.getState().tileLon;
+    const tLat = store.getState().tileLat;
+    const zoom = store.getState().zoom;
 
-    var config = {
+    const config = {
       baseURL: 'https://tile.mapzen.com/mapzen/vector/v1',
       dataKind: 'all',
       fileFormat: 'json'
     };
 
-    var callURL =  config.baseURL + '/' + config.dataKind + '/' + zoom + '/' + tLon + '/' + tLat + '.' + config.fileFormat + '?api_key=' + Key.vectorTile;
+    const callURL = `${config.baseURL}/${config.dataKind}/${zoom}/${tLon}/${tLat}.${config.fileFormat}?api_key=${Key.vectorTile}`;
     console.log(callURL);
     return callURL;
   }
 
- fetchTheTile(callURL) {
+  fetchTheTile(callURL) {
     this.domHelper.showLoadingBar();
 
-    //get rid of current Tile from scene if there is any
+    // get rid of current Tile from scene if there is any
     this.basicScene.removeObject('geoObjectsGroup');
 
-    //get rid of current preview
+    // get rid of current preview
     this.previewMap.destroy();
 
-    //draw previewmap
+    // draw previewmap
     this.previewMap.drawData();
-    // converting d3 path(svg) to three shape
-    //converting geocode to mercator tile nums
 
-    d3.json(callURL, (err,json) => {
+    d3.json(callURL, (err, json) => {
       if (err) {
         console.log(`Error during fetching json from the tile server ${err}`);
       } else {
-        var geoGroups = this.bakeTile(json);
-        this.basicScene.addObject(geoGroups);
+        this.basicScene.addObject(this.bakeTile(json));
       }
       // Update hash value
-      this.queryChecker.updateQueryString({
+      QueryChecker.updateQueryString({
         lon: store.getState().lon,
         lat: store.getState().lat,
         zoom: store.getState().zoom
@@ -134,172 +131,90 @@ class TileExporter {
   }
 
   bakeTile(json) {
-    var heights = [];
-    var tileX, tileY, tileW, tileH;
-    var projection = d3.geo.mercator()
+    // var tileX, tileY, tileW, tileH;
+    const projection = d3.geo.mercator()
       .center([store.getState().lon, store.getState().lat])
       .scale(1000000)
       .precision(0.0)
-      .translate([0,0])
+      .translate([0, 0]);
 
     // Will flip the Y coordinates that result from the geo projection
-    var flipY = d3.geo.transform({
-      point : function(x,y){
-        this.stream.point(x,-y)
+    const flipY = d3.geo.transform({
+      point(x, y) {
+        this.stream.point(x, -y);
       }
     });
 
     // Mercator Geo Projection then flipped in Y
     // Solution taken from http://stackoverflow.com/a/31647135/3049530
-    var projectionThenFlipY = {
-        stream: function(s) {
-            return projection.stream(flipY.stream(s));
-        }
-     };
-
-     var geoObj = this.tileConfig;
-     var convertedThreePaths = [];
-      var heights = [];
-      for (var obj in json) {
-        // var defaultHeight = 13;
-        // if(obj === 'earth') {
-          // var b = path.bounds(geoFeature);
-          // tileX = b[0][0];
-          // tileY = b[0][1];
-          // tileW = b[1][0] - b[0][0];
-          // tileH = b[1][1] - b[0][1];
-        //   defaultHeight = 10;
-        // } else if(obj === 'water') {
-        //   defaultHeight = 6;
-        // } else if(obj === 'landuse') {
-        //   defaultHeight = 15;
-        // } else if(obj === 'buildings') {
-        //   defaultHeight = 25;
-        // }
-        var pathWithHeights = [];
-        for (var geoFeature of json[obj].features) {
-          var path = d3.geo.path().projection(projectionThenFlipY);
-          //path = d3.geo.path().projection(projection);
-          var feature = path(geoFeature);
-
-          if(feature !== undefined) {
-            // 'a' command is not implemented in d3-three, skipping for now.
-            // 'a' is SVG path command for Ellpitic Arc Curve. https://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands
-            if(feature.indexOf('a') > 0) ;
-            else {
-              var mesh = this.dthreed.exportSVG(feature);
-              // convertedThreePaths.push(mesh);
-
-              var h = geoFeature.properties['height'] || geoObj[obj].height;
-              // heights.push(h);
-
-              pathWithHeights.push({
-                threeMesh: mesh,
-                height: h
-              });
-
-            }
-          }
-        }
-        geoObj[obj].paths = pathWithHeights;
+    const projectionThenFlipY = {
+      stream(s) {
+        return projection.stream(flipY.stream(s));
       }
+    };
+    const path = d3.geo.path().projection(projectionThenFlipY);
 
-      // var obj = {
-      //   paths: convertedThreePaths,
-      //   amounts: heights
-      // }
+    const geoObj = this.tileConfig;
+    for (var obj in json) { // eslint-disable-line
+      const pathWithHeights = [];
+      for (const geoFeature of json[obj].features) {
+        const feature = path(geoFeature);
+        // 'a' command is not implemented in d3-three, skipping for now.
+        // 'a' is SVG path command for Ellpitic Arc Curve. https://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands
+        if (feature.indexOf('a') < 0) {
+          const mesh = this.dthreed.exportSVG(feature);
 
-      // var geoGroup = this.getThreeGroup(obj);
-      var geoGroup = this.getThreeGroup(testObj);
-      geoGroup.translateX(-100 / ((-15 + store.getState().zoom)*2)); //* 2);
-      geoGroup.translateY(100/ ((-15 + store.getState().zoom)*2)); //* 2);
-      // geoGroup.translateX(-(tileX+tileW));
-      // geoGroup.translateY(-(tileY+tileH));
-      return geoGroup;
+          const h = geoFeature.properties['height'] || geoObj[obj]['height'];
+
+          pathWithHeights.push({
+            threeMesh: mesh,
+            height: h
+          });
+        }
+      }
+      geoObj[obj].paths = pathWithHeights;
+    }
+
+    const geoGroup = this.getThreeGroup(geoObj);
+    geoGroup.translateX(-100 / ((-15 + store.getState().zoom) * 2)); //* 2);
+    geoGroup.translateY(100 / ((-15 + store.getState().zoom) * 2)); //* 2);
+    return geoGroup;
   }
 
   getThreeGroup(geoGroup) {
-    var geoObjectsGroup = new THREE.Group();
+    const geoObjectsGroup = new THREE.Group();
     geoObjectsGroup.name = 'geoObjectsGroup';
 
-    for(var feature in geoGroup) {
-      var color = feature.color || new THREE.Color("#5c5c5c");
-      var material = new THREE.MeshLambertMaterial({
-        color: color
-      });
-      for (var meshPath of geoGroup[feature].paths) {
-        for (var eachMesh of meshPath.threeMesh) {
-          var shape3d = eachMesh.extrude({
+    for (const feature of Object.keys(geoGroup)) {
+      const color = geoGroup[feature]['color'] || new THREE.Color('#5c5c5c');
+      const material = new THREE.MeshLambertMaterial({ color });
+      for (const meshPath of geoGroup[feature].paths) {
+        for (const eachMesh of meshPath.threeMesh) {
+          const shape3d = eachMesh.extrude({
             amount: meshPath.height,
             bevelEnabled: false
-          })
-          var mesh = new THREE.Mesh(shape3d, material);
-          geoObjectsGroup.add(mesh);
-        }
-      }
-    }
-    return geoObjectsGroup;
-  }
-
-  getOldThreeGroup(meshObjs) {
-
-    var geoObjectsGroup = new THREE.Group();
-    geoObjectsGroup.name = 'geoObjectsGroup';
-
-    var amount, simpleShapes, simpleShape, shape3d, toAdd, results = [];
-
-    var thePaths = meshObjs.paths;
-    var theAmounts = meshObjs.amounts;
-
-    var color = new THREE.Color("#5c5c5c");
-
-    // This is normal material for exporter
-    var material = new THREE.MeshLambertMaterial({
-      color: color
-    });
-
-    var i,j,k,len1;
-
-    for (i = 0; i < thePaths.length; i++) {
-      amount = theAmounts[i];
-      simpleShapes = thePaths[i];
-      len1 = simpleShapes.length;
-
-      //adding all the buildings to the group!
-      for (j = 0; j < len1; ++j) {
-
-        simpleShape = simpleShapes[j];
-        try {
-          shape3d = simpleShape.extrude({
-            amount: amount/ 6,
-            bevelEnabled: false
           });
-
-          var mesh = new THREE.Mesh(shape3d, material);
-          geoObjectsGroup.add(mesh);
-        } catch(e) {
-          console.log(e.message);
+          geoObjectsGroup.add(new THREE.Mesh(shape3d, material));
         }
-
       }
     }
-
     return geoObjectsGroup;
   }
+
 
   enableDownloadLink() {
-    var buildingObj = this.exportToObj();
-    var exportA = document.getElementById('exportA');
-    exportA.className = "";
-    exportA.download = 'tile'+store.getState().tileLon +'-'+store.getState().tileLat+'-'+store.getState().zoom+'.obj';
+    const buildingObj = this.exportToObj();
+    const exportA = document.getElementById('exportA');
+    exportA.className = '';
+    exportA.download = `tile-${store.getState().tileLon}-${store.getState().tileLat}-${store.getState().zoom}.obj`;
 
-    var blob = new Blob([buildingObj], {type: 'text'});
-    var url = URL.createObjectURL(blob);
+    const blob = new Blob([buildingObj], { type: 'text' });
+    const url = URL.createObjectURL(blob);
     exportA.href = url;
   }
 
-  exportToObj () {
-    var result = this.objExporter.parse(this.basicScene.getScene);
+  exportToObj() {
+    const result = this.objExporter.parse(this.basicScene.getScene);
     return result;
   }
 

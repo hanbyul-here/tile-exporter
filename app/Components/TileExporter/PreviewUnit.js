@@ -2,7 +2,6 @@ import * as d3 from 'd3';
 import store from '../../Redux/Store';
 import * as Key from '../../Keys';
 import { tile2Lon, tile2Lat } from './MapSpells';
-import { navigateTile } from './Exporter';
 
 class PreviewUnit {
 
@@ -14,23 +13,15 @@ class PreviewUnit {
             .append('svg')
             .attr('width', width)
             .attr('height', height);
-    this.tilePos = this.getTilePos(domID);
+    this.tilePos = PreviewUnit.getTilePos(domID);
 
     const btn = document.getElementById(domID);
     btn.addEventListener('click', () => {
-       exporter.navigateTile(this.tilePos);
+      exporter.navigateTile(this.tilePos);
     });
   }
 
-  get config() {
-    return {
-      baseURL: 'https://tile.mapzen.com/mapzen/vector/v1',
-      dataKind: 'all',
-      fileFormat: 'json'
-    };
-  }
-
-  getTilePos(domID) {
+  static getTilePos(domID) {
     // Figure out tile number based on Preview element's ID
     const tilePosObj = {
       ns: 0,
@@ -61,7 +52,7 @@ class PreviewUnit {
 
     const svg = this.svg;
 
-    d3.json(url.callURL, function(err, json) {
+    d3.json(url.callURL, (err, json) => {
       for (let obj in json) { // eslint-disable-line
         if (err) console.log(`Error : +${err}`);
         else {
@@ -85,7 +76,13 @@ class PreviewUnit {
     const tLon = store.getState().tileLon + this.tilePos.ew;
     const tLat = store.getState().tileLat + this.tilePos.ns;
 
-    const _callURL = `${this.config.baseURL}/${this.config.dataKind}/${zoom}/${tLon}/${tLat}.${this.config.fileFormat}?api_key=${Key.vectorTile}`;
+    const config = {
+      baseURL: 'https://tile.mapzen.com/mapzen/vector/v1',
+      dataKind: 'all',
+      fileFormat: 'json'
+    };
+
+    const _callURL = `${config.baseURL}/${config.dataKind}/${zoom}/${tLon}/${tLat}.${config.fileFormat}?api_key=${Key.vectorTile}`;
 
     const _centerLatLon = {
       lat: tile2Lat(tLat, zoom),

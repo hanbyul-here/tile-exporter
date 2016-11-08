@@ -38,5 +38,5 @@ function tileInfo(state = initialState, action = {}) {
   }
 }
 
-module.exports = tileInfo;
+export default tileInfo;
 

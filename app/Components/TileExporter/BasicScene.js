@@ -1,5 +1,5 @@
 import THREE from 'three';
-import OrbitControls from '../../libs/OrbitControl';
+import OrbitControls from '../../libs/OrbitControl'; // eslint-disable-line
 import '../../libs/Triangulation';
 // Changes the way Threejs does triangulation
 THREE.Triangulation.setLibrary('earcut');
