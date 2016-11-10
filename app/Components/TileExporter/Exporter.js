@@ -34,7 +34,7 @@ class TileExporter {
     window.addEventListener('resize', () => { this.basicScene.onWindowResize(); });
   }
 
-  get tileConfig() {
+  get tileConfig() {  // eslint-disable-line
     // These are all features from Mapzen Vector tile all layers
     return {
       water: {
@@ -83,7 +83,7 @@ class TileExporter {
     this.fetchTheTile(this.buildQueryURL());
   }
 
-  buildQueryURL() {
+  buildQueryURL() { // eslint-disable-line
     const tLon = store.getState().tileLon;
     const tLat = store.getState().tileLat;
     const zoom = store.getState().zoom;
@@ -164,7 +164,7 @@ class TileExporter {
         if (feature.indexOf('a') < 0) {
           const mesh = this.dthreed.exportSVG(feature);
 
-          const h = geoFeature.properties['height'] || geoObj[obj]['height'];
+          const h = geoFeature.properties['height'] || geoObj[obj]['height'];  // eslint-disable-line
 
           pathWithHeights.push({
             threeMesh: mesh,
@@ -181,12 +181,12 @@ class TileExporter {
     return geoGroup;
   }
 
-  getThreeGroup(geoGroup) {
+  getThreeGroup(geoGroup) {  // eslint-disable-line
     const geoObjectsGroup = new THREE.Group();
     geoObjectsGroup.name = 'geoObjectsGroup';
 
     for (const feature of Object.keys(geoGroup)) {
-      const color = geoGroup[feature]['color'] || new THREE.Color('#5c5c5c');
+      const color = geoGroup[feature]['color'] || new THREE.Color('#5c5c5c'); // eslint-disable-line
       const material = new THREE.MeshLambertMaterial({ color });
       for (const meshPath of geoGroup[feature].paths) {
         for (const eachMesh of meshPath.threeMesh) {
