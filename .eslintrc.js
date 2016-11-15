@@ -13,6 +13,6 @@ module.exports = {
     },
     "rules": {
         "comma-dangle": ["error", "never"],
-        "no-underscore-dangle": 0 // off
+        "no-underscore-dangle": 0
     }
 };

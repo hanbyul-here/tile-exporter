@@ -7,6 +7,7 @@ import PreviewMap from './PreviewMap';
 import QueryChecker from './QueryChecker';
 import { tile2Lon, tile2Lat } from './MapSpells';
 import DomHelper from './DomHelper';
+import TileConfig from './TileConfiguration';
 
 import Key from '../../Keys';
 
@@ -32,39 +33,6 @@ class TileExporter {
   attachEvents() {
     this.domHelper.attachEvents();
     window.addEventListener('resize', () => { this.basicScene.onWindowResize(); });
-  }
-
-  get tileConfig() {  // eslint-disable-line
-    // These are all features from Mapzen Vector tile all layers
-    return {
-      water: {
-        height: 6
-      },
-      buildings: {
-        height: 25
-      },
-      places: {
-        height: 0
-      },
-      transit: {
-        height: 0
-      },
-      pois: {
-        height: 0
-      },
-      boundaries: {
-        height: 15
-      },
-      roads: {
-        height: 15
-      },
-      earth: {
-        height: 10
-      },
-      landuse: {
-        height: 13
-      }
-    };
   }
 
   navigateTile(tilePos) {
@@ -154,7 +122,7 @@ class TileExporter {
     };
     const path = d3.geo.path().projection(projectionThenFlipY);
 
-    const geoObj = this.tileConfig;
+    const geoObj = TileConfig;
     for (var obj in json) { // eslint-disable-line
       const pathWithHeights = [];
       for (const geoFeature of json[obj].features) {
@@ -163,8 +131,10 @@ class TileExporter {
         // 'a' is SVG path command for Ellpitic Arc Curve. https://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands
         if (feature.indexOf('a') < 0) {
           const mesh = this.dthreed.exportSVG(feature);
-
-          const h = geoFeature.properties['height'] || geoObj[obj]['height'];  // eslint-disable-line
+          // This is very arbitrary way to scale real 'meter' to pixel level
+          // Better way can come up with calculating pixel per meter value
+          // getting right xyz ratio (See getMeterValue from MapSpells)
+          const h = geoFeature.properties['height']/5 + geoObj['earth']['height'] || geoObj[obj]['height']; // eslint-disable-line
 
           pathWithHeights.push({
             threeMesh: mesh,
