@@ -16,4 +16,8 @@ function tile2Lat(tileLat, zoom) {
   return ((360/Math.PI) * Math.atan(Math.pow( Math.E, (Math.PI - 2*Math.PI*tileLat/(Math.pow(2,zoom)))))-90).toFixed(7);
 }
 
-module.exports = { lon2tile, lat2tile, tile2Lon, tile2Lat };
+function getMeterValue(lat ,zoom) {
+  return 40075016.686 * Math.abs(Math.cos(lat * 180/Math.PI)) / Math.pow(2, zoom+8);
+}
+
+module.exports = { lon2tile, lat2tile, tile2Lon, tile2Lat, getMeterValue };

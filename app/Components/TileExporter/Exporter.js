@@ -5,7 +5,7 @@ import '../../libs/OBJ-Exporter';
 
 import PreviewMap from './PreviewMap';
 import QueryChecker from './QueryChecker';
-import { tile2Lon, tile2Lat } from './MapSpells';
+import { tile2Lon, tile2Lat, getMeterValue } from './MapSpells';
 import DomHelper from './DomHelper';
 
 import Key from '../../Keys';
@@ -134,7 +134,7 @@ class TileExporter {
     // var tileX, tileY, tileW, tileH;
     const projection = d3.geo.mercator()
       .center([store.getState().lon, store.getState().lat])
-      .scale(1000000)
+      .scale(600000 * (100 / 57) * Math.pow(2, (store.getState().zoom - 16)) * 2.56)
       .precision(0.0)
       .translate([0, 0]);
 
@@ -145,6 +145,8 @@ class TileExporter {
       }
     });
 
+    const ratio = 1/getMeterValue(store.getState().lat, store.getState().zoom);
+    console.log(ratio);
     // Mercator Geo Projection then flipped in Y
     // Solution taken from http://stackoverflow.com/a/31647135/3049530
     const projectionThenFlipY = {
@@ -164,7 +166,7 @@ class TileExporter {
         if (feature.indexOf('a') < 0) {
           const mesh = this.dthreed.exportSVG(feature);
 
-          const h = geoFeature.properties['height'] || geoObj[obj]['height'];  // eslint-disable-line
+          const h = geoFeature.properties['height']*ratio || geoObj[obj]['height'];  // eslint-disable-line
 
           pathWithHeights.push({
             threeMesh: mesh,
@@ -184,7 +186,6 @@ class TileExporter {
   getThreeGroup(geoGroup) {  // eslint-disable-line
     const geoObjectsGroup = new THREE.Group();
     geoObjectsGroup.name = 'geoObjectsGroup';
-
     for (const feature of Object.keys(geoGroup)) {
       const color = geoGroup[feature]['color'] || new THREE.Color('#5c5c5c'); // eslint-disable-line
       const material = new THREE.MeshLambertMaterial({ color });
