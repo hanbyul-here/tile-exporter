@@ -1,19 +1,23 @@
-////here all maps spells are!
-//convert lat/lon to mercator style number
-function long2tile(lon,zoom) {
-  return (Math.floor((lon+180)/360*Math.pow(2,zoom)));
+// Convert lat/lon to mercator style number
+function lon2tile(lon, zoom) {
+  return (Math.round((lon+180)/360*Math.pow(2,zoom)));
 }
-function lat2tile(lat,zoom)  {
-  return (Math.floor((1-Math.log(Math.tan(lat*Math.PI/180) + 1/Math.cos(lat*Math.PI/180))/Math.PI)/2 *Math.pow(2,zoom)));
+function lat2tile(lat ,zoom)  {
+  return (Math.round((1-Math.log(Math.tan(lat*Math.PI/180) + 1/Math.cos(lat*Math.PI/180))/Math.PI)/2 *Math.pow(2,zoom)));
 }
+// Reverse functions of the one above to navigate tiles
+// Functions done by Matt Blair https://github.com/blair1618 Thank you :)
 
-//shold check it will work
 function tile2Lon(tileLon, zoom) {
-  return (tileLon*360/Math.pow(2,zoom)-180).toFixed(10);
+  return (tileLon*360/Math.pow(2,zoom)-180).toFixed(7);
 }
 
 function tile2Lat(tileLat, zoom) {
-  return ((360/Math.PI) * Math.atan(Math.pow( Math.E, (Math.PI - 2*Math.PI*tileLat/(Math.pow(2,zoom)))))-90).toFixed(10);
+  return ((360/Math.PI) * Math.atan(Math.pow( Math.E, (Math.PI - 2*Math.PI*tileLat/(Math.pow(2,zoom)))))-90).toFixed(7);
+}
+// This is the left over from an attemp to get right xyz ratio of the tile
+function getMeterValue(lat ,zoom) {
+  return 40075016.686 * Math.abs(Math.cos(lat * 180/Math.PI)) / Math.pow(2, zoom+8).toFixed(4);
 }
 
-module.exports = {long2tile, lat2tile, tile2Lon, tile2Lat};
+module.exports = { lon2tile, lat2tile, tile2Lon, tile2Lat, getMeterValue };

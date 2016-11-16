@@ -10,7 +10,8 @@ const config = {
     this.module.noParse.push(path);
   },
   entry: [
-    './app/App'
+   'webpack-hot-middleware/client',
+    './app/App.jsx'
   ],
   output: {
     path: path.resolve(__dirname, './'),
@@ -35,8 +36,16 @@ const config = {
       loader: 'style!css!sass?sourceMap'
     },
     {
-      test: /\.(woff|eot|ttf|svg|png|yaml)$/,
-      loader: 'url-loader?limit=100000'
+      test: /\.(svg)$/,
+      loader: 'url-loader?limit=10000'
+    },
+    {
+      test: /\.jsx?$/,
+      loader: 'babel',
+      exclude: /node_modules/,
+      query: {
+        presets: ['react', 'es2015']
+      }
     },
     {
       test: /.js?$/,
@@ -48,7 +57,7 @@ const config = {
     }]
   },
   resolve: {
-    extensions: ['', '.js']
+    extensions: ['', '.js', '.jsx']
   }
 };
 
