@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "./node_modules/.bin/eslint --ext app/Components/Search/*.jsx --ext app/Components/TileExporter/*.js;",
     "dev": "node -r babel-core/register server.js",
-    "build": "webpack -p"
+    "build": "webpack -p && mkdir -p dist && cp index.html ./dist/index.html && cp bundle.js ./dist/bundle.js"
   },
   "keywords": [
     "vector",
