@@ -27,4 +27,4 @@ This command builds `index.html` and  `bundle.js` file on the directory.
 There is also a [vanilla javascript version](https://github.com/hanbyul-here/vector-tile-obj-exporter) of this, if you prefer.
 
 - If you are interested in large scale, elevation data combined 3d print, check out [Vectiler](https://github.com/karimnaaji/vectiler).
-- If you are interested in SVG export, check [SVG Export tool](https://github.com/mapzen/svg-export).
+- If you are interested in SVG export, check [SVG Export tool](https://github.com/hanbyul-here/svg-exporter).
