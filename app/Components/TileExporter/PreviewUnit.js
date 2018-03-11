@@ -77,7 +77,7 @@ class PreviewUnit {
     const tLat = store.getState().tileLat + this.tilePos.ns;
 
     const config = {
-      baseURL: 'https://tile.mapzen.com/mapzen/vector/v1',
+      baseURL: 'https://tile.nextzen.org/tilezen/vector/v1',
       dataKind: 'all',
       fileFormat: 'json'
     };
