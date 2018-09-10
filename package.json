@@ -14,7 +14,7 @@
     "obj"
   ],
   "dependencies": {
-    "body-parser": "1.14.1",
+    "body-parser": "^1.18.3",
     "d3": "^3.5.16",
     "earcut": "^2.1.1",
     "file-loader": "0.8.4",
@@ -29,8 +29,8 @@
     "react-dom": "0.14.0",
     "react-inline-css": "2.0.0",
     "redux": "3.0.1",
-    "serve-favicon": "2.3.0",
-    "serve-static": "1.10.0",
+    "serve-favicon": "^2.5.0",
+    "serve-static": "^1.13.2",
     "three": "^0.74.0",
     "url-loader": "0.5.6",
     "webpack-isomorphic-tools": "^2.5.7"
