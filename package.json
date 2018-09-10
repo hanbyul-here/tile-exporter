@@ -21,7 +21,7 @@
     "http-proxy": "1.11.2",
     "less": "2.5.3",
     "less-loader": "^2.2.1",
-    "lodash": "^3.10.1",
+    "lodash": "^4.17.0",
     "node-sass": "^3.13.0",
     "piping": "0.2.0",
     "pretty-error": "1.2.0",
@@ -31,7 +31,6 @@
     "redux": "3.0.1",
     "serve-favicon": "2.3.0",
     "serve-static": "1.10.0",
-    "superagent": "1.4.0",
     "three": "^0.74.0",
     "url-loader": "0.5.6",
     "webpack-isomorphic-tools": "^2.5.7"
