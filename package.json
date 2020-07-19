@@ -21,7 +21,7 @@
     "http-proxy": "1.11.2",
     "less": "2.5.3",
     "less-loader": "^2.2.1",
-    "lodash": "^4.17.0",
+    "lodash": "^4.17.19",
     "node-sass": "^4.13.1",
     "piping": "0.2.0",
     "pretty-error": "1.2.0",
